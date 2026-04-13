@@ -1,0 +1,16 @@
+# Binary
+personal-website
+
+# Environment
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
