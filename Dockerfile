@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine3.21 AS builder
+FROM golang:1.24-alpine3.21 AS builder
 
 WORKDIR /app
 
@@ -16,6 +16,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
 
 # ── Final image ──
 FROM alpine:3.21
+
+# Upgrade Alpine packages to pick up latest security patches
+RUN apk update && apk upgrade --no-cache && rm -rf /var/cache/apk/*
 
 RUN addgroup -S app && adduser -S app -G app
 
