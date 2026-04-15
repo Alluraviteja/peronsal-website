@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/style.css?v=2" />
 </head>
 <body>
 
@@ -35,7 +35,8 @@
   <!-- HERO -->
   <section id="hero">
     <h1>Hi, I'm <span>{{.Name}}</span><br/>{{.Title}}</h1>
-    <p>Software engineer with 5+ years building, integrating, and scaling systems across APIs, event-driven pipelines, and cloud-native applications. Passionate about performance, reliability, and clean architecture.</p>
+    <p>Software Engineer with 5+ years of experience architecting high-throughput distributed systems and event-driven pipelines (Kafka, Spring Boot, Python). I specialize in the full SDLC, managing everything from resilient API design and secure authentication (Keycloak) to cloud-native deployments and observability (OpenTelemetry/Grafana).</p>
+    <p>Currently, I am bridging the gap between core systems engineering and AI implementation, leveraging my experience in ETL pipelines and scalable architecture to integrate Large Language Models and agentic workflows into robust, production-ready environments.</p>
     <div class="hero-btns">
       <a href="#projects" class="btn btn-primary">View My Work</a>
       <a href="#contact" class="btn btn-outline">Get in Touch</a>
@@ -92,20 +93,61 @@
     <div class="timeline">
 
       <div class="timeline-item">
-        <div class="timeline-date">Aug '24 – Present</div>
+        <div class="timeline-date">Jan '24 – Present</div>
         <div class="timeline-content">
-          <h3>Software Engineer</h3>
           <div class="company">Realoq Inc · Concord, California</div>
-          <p>Built resilient APIs using Java &amp; Spring Boot (JHipster) with Elasticsearch and PostgreSQL. Integrated Stripe Payments with webhook handling and full subscription lifecycle management. Implemented Apache Kafka for event-driven, fault-tolerant message delivery. Built a Python ETL pipeline to load property data from Trestle into PostgreSQL. Achieved 40% faster API responses via Spring Cache and ensured 90% test coverage with JUnit &amp; Mockito.</p>
-        </div>
-      </div>
 
-      <div class="timeline-item">
-        <div class="timeline-date">Jan '24 – Apr '24</div>
-        <div class="timeline-content">
-          <h3>Associate Software Engineer Intern</h3>
-          <div class="company">Realoq Inc · Concord, California</div>
-          <p>Developed APIs for the Realoq project using JHipster, Elasticsearch, and MongoDB. Integrated Keycloak for security and third-party APIs (Slipstream, SMS, email). Achieved 95%+ test coverage with JUnit and integrated SonarCloud. Implemented secure file uploads using GCP Cloud Storage and OCI Object Storage with Pre-Signed URLs and IAM-based access control.</p>
+          <!-- Role 1: Software Engineer -->
+          <div class="role-block">
+            <div class="role-header">
+              <h3>Software Engineer</h3>
+              <span class="role-date">Aug '24 – Present</span>
+            </div>
+            <p>Architecting enterprise-grade backend systems and scaling distributed architectures across multi-cloud environments (GCP/OCI) for the <strong>Rexdat project</strong>.</p>
+            <ul class="experience-list">
+              <li><span><strong>System Architecture:</strong> Scaled high-throughput APIs utilizing <strong>API-first design</strong> and <strong>OAuth2 security</strong>, ensuring seamless interoperability for enterprise-grade integrations.</span></li>
+              <li><span><strong>Distributed Systems:</strong> Engineered a resilient event-driven processing system using <strong>Apache Kafka</strong>; implemented <strong>idempotent consumers</strong> and <strong>DLQs</strong> to ensure 100% message delivery reliability.</span></li>
+              <li><span><strong>Performance Engineering:</strong> Reduced database load and improved API response times by <strong>70%</strong> through bottleneck analysis and the implementation of a high-availability <strong>Redis cluster</strong>.</span></li>
+              <li><span><strong>DevOps &amp; Cloud:</strong> Standardized the deployment lifecycle by containerizing services with <strong>Docker</strong> and architecting <strong>CI/CD pipelines</strong> across <strong>GCP and OCI</strong> to ensure environment parity.</span></li>
+              <li><span><strong>Fintech:</strong> Developed a secure <strong>Stripe</strong> infrastructure with <strong>webhook signature verification</strong> and idempotent patterns to guarantee transaction integrity.</span></li>
+              <li><span><strong>Observability:</strong> Spearheaded the integration of <strong>OpenTelemetry</strong> and <strong>Grafana</strong>, significantly reducing <strong>MTTR</strong> through real-time distributed tracing and root-cause analysis.</span></li>
+            </ul>
+            <div class="proj-tags">
+              <span class="proj-tag">Java</span>
+              <span class="proj-tag">Spring Boot</span>
+              <span class="proj-tag">Kafka</span>
+              <span class="proj-tag">Redis</span>
+              <span class="proj-tag">Docker</span>
+              <span class="proj-tag">Stripe</span>
+              <span class="proj-tag">OpenTelemetry</span>
+              <span class="proj-tag">GCP</span>
+              <span class="proj-tag">OCI</span>
+            </div>
+          </div>
+
+          <!-- Role 2: Intern -->
+          <div class="role-block">
+            <div class="role-header">
+              <h3>Associate Software Engineer Intern</h3>
+              <span class="role-date">Jan '24 – Apr '24</span>
+            </div>
+            <p>Focused on core API development, cloud storage infrastructure, and establishing rigorous testing and security standards for the Realoq platform.</p>
+            <ul class="experience-list">
+              <li><span><strong>Cloud Infrastructure:</strong> Engineered secure file upload systems using <strong>GCP Cloud Storage</strong> and <strong>OCI Object Storage</strong>, leveraging <strong>Pre-Signed URLs</strong> and IAM-based access control.</span></li>
+              <li><span><strong>API Development:</strong> Built resilient backend services using <strong>JHipster, MongoDB, and Elasticsearch</strong>; integrated <strong>Slipstream</strong> and communication gateways while applying <strong>Fluent Interface</strong> design patterns.</span></li>
+              <li><span><strong>Reliability &amp; Quality:</strong> Achieved <strong>95% code coverage</strong> using <strong>JUnit</strong> and <strong>SonarCloud</strong>, contributing to a <strong>30% reduction in application downtime</strong>.</span></li>
+              <li><span><strong>Security &amp; Monitoring:</strong> Fortified application security with <strong>Keycloak</strong> and established foundational observability using <strong>GCP Cloud Operations</strong> (Stackdriver).</span></li>
+            </ul>
+            <div class="proj-tags">
+              <span class="proj-tag">MongoDB</span>
+              <span class="proj-tag">Elasticsearch</span>
+              <span class="proj-tag">Keycloak</span>
+              <span class="proj-tag">JUnit</span>
+              <span class="proj-tag">JHipster</span>
+              <span class="proj-tag">SonarCloud</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -150,17 +192,17 @@
       <div class="project-card">
         <div class="proj-icon">🚦</div>
         <h3>API Gateway</h3>
-        <p>A centralized API gateway handling routing, authentication, load balancing, and request/response transformation across microservices.</p>
+        <p>A lightweight, production-grade API Gateway that acts as a single entry point for multiple backend services handling Host-based routing, rate limit enforcement (via external Rate Limiter Service), and circuit breaking.</p>
         <div class="proj-links">
           <a href="https://github.com/Alluraviteja/api-gateway" target="_blank" rel="noopener noreferrer" class="proj-link">
             <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="margin-right:4px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
             GitHub
           </a>
-          <a href="#" target="_blank" rel="noopener noreferrer" class="proj-link">🌐 Live</a>
         </div>
         <div class="proj-tags">
-          <span class="proj-tag">Node.js</span>
-          <span class="proj-tag">Express</span>
+          <span class="proj-tag">Go</span>
+          <span class="proj-tag">Prometheus</span>  
+          <span class="proj-tag">Gobreaker</span>
           <span class="proj-tag">Docker</span>
         </div>
       </div>
@@ -174,7 +216,6 @@
             <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="margin-right:4px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
             GitHub
           </a>
-          <a href="#" target="_blank" rel="noopener noreferrer" class="proj-link">🌐 Live</a>
         </div>
         <div class="proj-tags">
           <span class="proj-tag">Go</span>
@@ -192,7 +233,6 @@
             <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="margin-right:4px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
             GitHub
           </a>
-          <a href="#" target="_blank" rel="noopener noreferrer" class="proj-link">🌐 Live</a>
         </div>
         <div class="proj-tags">
           <span class="proj-tag">Node.js</span>
@@ -210,7 +250,6 @@
             <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="margin-right:4px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
             GitHub
           </a>
-          <a href="#" target="_blank" rel="noopener noreferrer" class="proj-link">🌐 Live</a>
         </div>
         <div class="proj-tags">
           <span class="proj-tag">React</span>
