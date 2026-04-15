@@ -72,8 +72,8 @@ jobs:
             docker run -d \
               --name personal-website \
               --restart always \
-              -e PORT=${{ secrets.PORT }} \
-              -p 8080:8080 \
+              -e PORT=${{ secrets.CONTAINER_PORT }} \
+              -p ${{ secrets.SERVER_PORT }}:${{ secrets.CONTAINER_PORT }} \
               $IMAGE
 
             # Verify container is running
@@ -88,8 +88,8 @@ jobs:
                 docker run -d \
                   --name personal-website \
                   --restart always \
-                  -e PORT=${{ secrets.PORT }} \
-                  -p 8080:8080 \
+                  -e PORT=${{ secrets.CONTAINER_PORT }} \
+                  -p ${{ secrets.SERVER_PORT }}:${{ secrets.CONTAINER_PORT }} \
                   $PREVIOUS_IMAGE
               else
                 echo "No previous image to roll back to — this was the first deploy"
