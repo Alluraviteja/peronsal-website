@@ -73,6 +73,7 @@ jobs:
               --name personal-website \
               --restart always \
               -e PORT=${{ secrets.CONTAINER_PORT }} \
+              -e DOCKER_NETWORK=${{ secrets.DOCKER_NETWORK }} \
               -p ${{ secrets.SERVER_PORT }}:${{ secrets.CONTAINER_PORT }} \
               $IMAGE
 
@@ -89,6 +90,7 @@ jobs:
                   --name personal-website \
                   --restart always \
                   -e PORT=${{ secrets.CONTAINER_PORT }} \
+                  -e DOCKER_NETWORK=${{ secrets.DOCKER_NETWORK }} \
                   -p ${{ secrets.SERVER_PORT }}:${{ secrets.CONTAINER_PORT }} \
                   $PREVIOUS_IMAGE
               else
