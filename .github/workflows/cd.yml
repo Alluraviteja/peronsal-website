@@ -74,7 +74,6 @@ jobs:
               --restart always \
               --network ${{ secrets.DOCKER_NETWORK }} \
               -e PORT=${{ secrets.CONTAINER_PORT }} \
-              -p ${{ secrets.SERVER_PORT }}:${{ secrets.CONTAINER_PORT }} \
               $IMAGE
 
             # Verify container is running
@@ -91,7 +90,6 @@ jobs:
                   --restart always \
                   --network ${{ secrets.DOCKER_NETWORK }} \
                   -e PORT=${{ secrets.CONTAINER_PORT }} \
-                  -p ${{ secrets.SERVER_PORT }}:${{ secrets.CONTAINER_PORT }} \
                   $PREVIOUS_IMAGE
               else
                 echo "No previous image to roll back to — this was the first deploy"
