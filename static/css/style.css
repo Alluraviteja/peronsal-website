@@ -238,8 +238,8 @@ section { padding: var(--sp-12) var(--sp-4); max-width: 900px; margin: 0 auto; }
   transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
 }
 .project-card:hover { box-shadow: var(--shadow-md); border-color: var(--accent); transform: translateY(-2px); }
-.project-card .proj-icon { font-size: 1.75rem; margin-bottom: var(--sp-2); }
-.project-card h3 { font-size: var(--text-base); font-weight: 600; margin-bottom: var(--sp-1); }
+.project-card .proj-icon { font-size: 1.25rem; line-height: 1; flex-shrink: 0; }
+.project-card h3 { font-size: var(--text-base); font-weight: 600; margin-bottom: var(--sp-1); display: flex; align-items: center; gap: 0.4rem; }
 .project-card p { font-size: var(--text-sm); color: var(--muted); margin-bottom: var(--sp-2); line-height: 1.6; flex: 1; }
 .proj-links { display: flex; gap: var(--sp-1); margin-bottom: var(--sp-2); }
 .proj-link {
@@ -450,6 +450,7 @@ footer {
 
   .timeline-item { grid-template-columns: 1fr; gap: 0.25rem; }
   .timeline-date { padding-top: 0; font-size: var(--text-xs); }
+  .role-header { flex-wrap: wrap; gap: 0.25rem; }
 
   .social-links { flex-direction: column; align-items: center; }
   .social-link { width: 100%; max-width: 300px; justify-content: center; }
