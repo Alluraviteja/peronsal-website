@@ -7,91 +7,6 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏱️</text></svg>" />
   <link rel="stylesheet" href="/static/css/inter.css" />
   <link rel="stylesheet" href="/static/css/style.css?v=2" />
-  <style>
-    nav { justify-content: space-between; padding: 0 var(--sp-4); }
-    .nav-brand { font-weight: 700; color: var(--text); font-size: var(--text-base); }
-    .nav-brand:hover { text-decoration: none; color: var(--accent); }
-    .nav-back {
-      display: flex; align-items: center; gap: 0.375rem;
-      color: var(--muted); font-size: var(--text-sm); font-weight: 500;
-      min-height: 44px; padding: 0 var(--sp-1);
-    }
-    .nav-back:hover { color: var(--accent); text-decoration: none; }
-
-    .page-hero {
-      max-width: 900px; margin: 0 auto;
-      padding: calc(60px + var(--sp-6)) var(--sp-4) var(--sp-8);
-      text-align: center;
-    }
-    .page-hero-icon { font-size: 1em; line-height: 1; }
-    .page-hero h1 {
-      display: flex; align-items: center; justify-content: center; gap: 0.4em;
-      font-size: clamp(2rem, 5vw, 3rem); font-weight: 800;
-      letter-spacing: -0.02em; line-height: 1.15; margin-bottom: var(--sp-2);
-    }
-    .page-hero p {
-      font-size: var(--text-lg); color: var(--muted);
-      max-width: 65ch; line-height: 1.75; margin-bottom: var(--sp-4);
-      margin-left: auto; margin-right: auto;
-    }
-    .page-hero .proj-tags { justify-content: center; }
-
-    .content-section {
-      max-width: 900px; margin: 0 auto;
-      padding: var(--sp-8) var(--sp-4);
-      border-top: 1px solid var(--border);
-    }
-    .content-section h2 {
-      font-size: clamp(1.3rem, 3vw, 1.6rem); font-weight: 700;
-      letter-spacing: -0.02em; margin-bottom: var(--sp-4);
-    }
-    .content-section > p {
-      color: var(--muted); line-height: 1.75;
-      margin-bottom: var(--sp-3); max-width: 70ch;
-    }
-
-    .algo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin-top: var(--sp-3); }
-    .algo-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: var(--sp-4);
-    }
-    .algo-card .algo-icon { font-size: 1.75rem; margin-bottom: var(--sp-2); }
-    .algo-card h3 { font-size: var(--text-base); font-weight: 700; margin-bottom: var(--sp-1); }
-    .algo-card > p { font-size: var(--text-sm); color: var(--muted); line-height: 1.7; margin-bottom: var(--sp-2); }
-    .algo-card ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.375rem; }
-    .algo-card ul li {
-      font-size: var(--text-sm); color: var(--muted);
-      display: flex; gap: 0.5rem; align-items: flex-start;
-    }
-    .algo-card ul li::before { content: '→'; color: var(--accent); font-weight: 600; flex-shrink: 0; }
-
-.highlight-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: var(--sp-3); margin-top: var(--sp-3);
-    }
-    .highlight-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: var(--sp-3);
-    }
-    .highlight-card h3 { font-size: var(--text-sm); font-weight: 600; margin-bottom: 0.5rem; }
-    .highlight-card p { font-size: var(--text-sm); color: var(--muted); line-height: 1.65; }
-
-    .cta-section {
-      max-width: 900px; margin: 0 auto;
-      padding: var(--sp-8) var(--sp-4);
-      border-top: 1px solid var(--border);
-      display: flex; align-items: center;
-      justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap;
-    }
-    .cta-section h2 { font-size: var(--text-xl); font-weight: 700; margin-bottom: 0.25rem; }
-    .cta-section p { color: var(--muted); font-size: var(--text-sm); }
-
-    @media (max-width: 680px) {
-      .algo-grid { grid-template-columns: 1fr; }
-      .cta-section { flex-direction: column; align-items: flex-start; }
-      .page-hero { padding-top: calc(60px + var(--sp-3)); }
-    }
-  </style>
 </head>
 <body>
 
@@ -105,7 +20,7 @@
       Back
     </a>
     <a href="/" class="nav-brand">System Design</a>
-    <div style="width:60px"></div>
+    <div class="nav-spacer"></div>
   </nav>
 
   <main id="main">
@@ -135,7 +50,7 @@
       <p class="section-label">Algorithm</p>
       <h2>Rate Limiting Strategy</h2>
       <p>Token Bucket via Bucket4j, backed by Redis. All bucket state lives in Redis so the limit is enforced consistently across every instance of the service.</p>
-      <div class="algo-grid" style="grid-template-columns: 1fr;">
+      <div class="algo-grid algo-grid--single">
         <div class="algo-card">
           <div class="algo-icon">🪣</div>
           <h3>Token Bucket (Bucket4j + Redis)</h3>
@@ -157,7 +72,7 @@
       <img
         src="/static/img/rate-limiter-arch.svg"
         alt="Architecture diagram: Client Request → Spring Boot API → Redis (Bucket4j token bucket) and PostgreSQL (config + audit)"
-        style="width:100%;height:auto;display:block;border-radius:var(--radius-lg);border:1px solid var(--border);margin-top:var(--sp-3);"
+        class="arch-img"
         loading="lazy"
       />
     </section>
@@ -199,7 +114,7 @@
         <p>Full implementation on GitHub.</p>
       </div>
       <a href="https://github.com/Alluraviteja/rate-limiting-service" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-        <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="margin-right:8px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="btn-icon"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         GitHub
       </a>
     </div>
@@ -210,6 +125,6 @@
     <p>Designed &amp; Built by {{.Name}} &nbsp;&middot;&nbsp; <span id="year"></span></p>
   </footer>
 
-  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <script src="/static/js/main.js" defer></script>
 </body>
 </html>
