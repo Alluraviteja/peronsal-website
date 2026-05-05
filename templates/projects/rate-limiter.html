@@ -27,40 +27,43 @@
 
     <div class="page-hero">
       <h1><span class="page-hero-icon">⏱️</span> Rate Limiter</h1>
-      <p>A distributed, high-performance rate limiting service built with Spring Boot, using the Token Bucket algorithm backed by Redis to protect APIs from abuse and ensure fair usage across clients.</p>
+      <p>A standalone rate limiting service built with Spring Boot. Rather than baking limits into every API, this runs as a shared component — any upstream gateway can call it, get a yes/no back, and forward the result to the client as standard rate-limit headers.</p>
       <div class="proj-tags">
         <span class="proj-tag">Spring Boot</span>
-        <span class="proj-tag">Docker</span>
-        <span class="proj-tag">CI/CD</span>
+        <span class="proj-tag">Token Bucket</span>
+        <span class="proj-tag">Fail-open / Fail-closed</span>
         <span class="proj-tag">Redis</span>
         <span class="proj-tag">Bucket4j</span>
         <span class="proj-tag">Lettuce</span>
         <span class="proj-tag">Lua Script</span>
         <span class="proj-tag">PostgreSQL</span>
+        <span class="proj-tag">Docker</span>
+        <span class="proj-tag">Resilience4j</span>
+        <span class="proj-tag">CI/CD</span>
       </div>
     </div>
 
     <section class="content-section">
       <p class="section-label">Overview</p>
       <h2>What It Does</h2>
-      <p>The Rate Limiter acts as a middleware layer that controls the rate of incoming API requests on a per-client basis. Rather than embedding rate limiting logic into individual services, this runs as a standalone service that any upstream gateway or service can consult before processing a request.</p>
-      <p>It exposes a simple HTTP API: given a client identifier and an endpoint key, it returns <code>allowed</code>, <code>remaining tokens</code>, and <code>retry-after</code> — so callers can forward the request or return a meaningful 429 with standard rate-limit headers.</p>
+      <p>You register an app, assign it a rate limit plan, and this service does the rest. When a request comes in, the caller sends a service identifier and client IP; the service checks the token bucket in Redis and responds with <code>allowed</code>, <code>remaining tokens</code>, and <code>retry-after</code>. The caller can pass those straight back as <code>RateLimit-*</code> headers — no extra work on their end.</p>
+      <p>Every decision — allowed or blocked — gets written to PostgreSQL with the full request context: IP, path, HTTP method, device type, browser, OS, and whether it looked like a bot. That audit log makes it straightforward to investigate abuse or tune limits after the fact.</p>
     </section>
 
     <section class="content-section">
       <p class="section-label">Algorithm</p>
       <h2>Rate Limiting Strategy</h2>
-      <p>Token Bucket via Bucket4j, backed by Redis. All bucket state lives in Redis so the limit is enforced consistently across every instance of the service.</p>
+      <p>Token Bucket via Bucket4j, with all state stored in Redis. Because the bucket lives in Redis rather than in-process, the limit holds the same whether you're running one instance or ten.</p>
       <div class="algo-grid algo-grid--single">
         <div class="algo-card">
           <div class="algo-icon">🪣</div>
           <h3>Token Bucket (Bucket4j + Redis)</h3>
-          <p>Each registered app gets a bucket with a fixed capacity that refills at a constant rate. Requests consume tokens; if the bucket is empty, the request is throttled.</p>
+          <p>Each app gets a bucket with a capacity ceiling and a steady refill rate. Incoming requests spend tokens; once the bucket is empty, requests are blocked until tokens refill.</p>
           <ul>
-            <li>Allows short bursts up to bucket capacity</li>
-            <li>Smooth greedy refill via configurable rate and period</li>
-            <li>Distributed — bucket state stored in Redis, shared across all instances</li>
-            <li>Atomic read-modify-write via Bucket4j Lua script — no race conditions</li>
+            <li>Handles short bursts — callers can spend up to the full capacity before hitting the limit</li>
+            <li>Greedy refill — tokens trickle back in continuously rather than all at once</li>
+            <li>Bucket state lives in Redis — consistent across every running instance</li>
+            <li>Read-modify-write is a single atomic Lua script — no race conditions under concurrency</li>
           </ul>
         </div>
       </div>
@@ -69,7 +72,7 @@
     <section class="content-section">
       <p class="section-label">Architecture</p>
       <h2>How It's Wired Together</h2>
-      <p>The service is intentionally thin. Spring Boot handles the API surface and dependency wiring. Redis via Lettuce holds transient rate state, and PostgreSQL persists client configurations and audit records.</p>
+      <p>Kept the data model intentionally split: Redis holds live token counts with a TTL matching each plan's refill period — nothing lingers longer than it needs to. PostgreSQL holds the durable stuff: app registrations, rate limit plans, and the full audit log. Spring Boot wires the two together and exposes the HTTP API.</p>
       <img
         src="/static/img/rate-limiter-arch.svg"
         alt="Architecture diagram: Client Request → Spring Boot API → Redis (Bucket4j token bucket) and PostgreSQL (config + audit)"
@@ -84,27 +87,27 @@
       <div class="highlight-grid">
         <div class="highlight-card">
           <h3>Atomic Lua Scripts</h3>
-          <p>Every token-bucket check is a single Lua script executed atomically on Redis: GET the serialized bucket state, apply refill logic, check availability, SET the updated state back with a TTL — all in one operation with no interleaving.</p>
+          <p>The problem with distributed rate limiting is the read-modify-write gap. If two nodes both read "one token left" before either writes back, both requests slip through. Bucket4j solves this by sending the entire check — read, refill, decrement, write — as a single Lua script. Redis executes Lua atomically, so no two requests can interleave on the same key.</p>
         </div>
         <div class="highlight-card">
           <h3>Lettuce Async Client</h3>
-          <p>Lettuce's async commands keep Redis I/O non-blocking. A single thread-safe, multiplexed connection is shared across all concurrent requests — no pool thrash, no stalling on network round-trips.</p>
+          <p>Lettuce multiplexes many concurrent requests over one connection, so Redis calls don't block threads while waiting on the network. Under load, that adds up — one shared connection handles everything without the pool pressure you'd see with a blocking client.</p>
         </div>
         <div class="highlight-card">
-          <h3>Config-Driven Rules</h3>
-          <p>Rate limit rules — capacity, refill rate, and refill period — are stored in PostgreSQL per app and lazy-loaded on first request, then cached in-process. Rule updates take effect without a redeployment.</p>
+          <h3>Config-Driven Plans</h3>
+          <p>Each app's capacity, refill rate, and refill window are stored in PostgreSQL and loaded lazily on first use, then held in an in-process cache. Updating a plan in the database takes effect on the next request with no restart needed. The cache can also be flushed manually via an admin endpoint.</p>
         </div>
         <div class="highlight-card">
           <h3>Per-IP or Per-App Limiting</h3>
-          <p>Each registered app can be configured to enforce limits per IP address or per app as a whole. The bucket key is scoped accordingly, giving fine-grained control over how quota is shared across callers.</p>
+          <p>When registering an app you choose how quota is scoped. Per-app mode gives the whole service a single shared bucket — good for capping total throughput. Per-IP mode gives each caller their own — better for public-facing APIs where you don't want one client exhausting everyone else's quota. The bucket key in Redis changes based on that flag.</p>
         </div>
         <div class="highlight-card">
-          <h3>Async Audit Trail</h3>
-          <p>Every rate decision is handed off to an async audit queue — fire-and-forget so the hot path stays fast. Denied requests and a sample of allowed ones are written to PostgreSQL (the same instance as the config store) for analytics and abuse investigation.</p>
+          <h3>Circuit Breaker &amp; Retry</h3>
+          <p>Redis calls go through Resilience4j — a retry layer for transient blips (two attempts, 50ms apart, only on Redis exceptions) and a count-based circuit breaker that trips when 50% of calls fail over a 20-request window. Once open, it waits 10 seconds before testing again. The goal is to stop hammering a Redis instance that's clearly down and recover automatically when it comes back.</p>
         </div>
         <div class="highlight-card">
-          <h3>Failure Handling</h3>
-          <p>If Redis is unreachable — timeout or network error — the service can be configured to fail-open (allow all traffic, prioritize availability) or fail-closed (block all traffic, prioritize correctness). The right choice depends on the caller's risk tolerance.</p>
+          <h3>Fail-Open / Fail-Closed</h3>
+          <p>If Redis is unreachable and retries are exhausted, each app has a flag controlling what happens next. Fail-open lets the request through — availability matters more than enforcement. Fail-closed returns a 503 — correctness matters more. Both outcomes are logged so you can see how often the fallback is actually firing in production.</p>
         </div>
       </div>
     </section>
