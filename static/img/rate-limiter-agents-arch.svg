@@ -1,0 +1,156 @@
+<svg viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block" font-family="Inter, system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="mDark"   markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7 Z" fill="#374151"/></marker>
+    <marker id="mBlue"   markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7 Z" fill="#3b82f6"/></marker>
+    <marker id="mOrange" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7 Z" fill="#ea580c"/></marker>
+    <marker id="mPurple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7 Z" fill="#7c3aed"/></marker>
+    <marker id="mIndigo" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7 Z" fill="#4f46e5"/></marker>
+    <marker id="mGray"   markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7 Z" fill="#9ca3af"/></marker>
+    <marker id="mGreen"  markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7 Z" fill="#059669"/></marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="620" rx="14" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+
+  <!-- Title -->
+  <text x="500" y="22" text-anchor="middle" font-size="15" font-weight="700" fill="#111827">Rate Limiter Agents · Pipeline</text>
+
+  <!-- ── APSCHEDULER ── -->
+  <rect x="330" y="32" width="340" height="50" rx="10" fill="white" stroke="#059669" stroke-width="2"/>
+  <text x="500" y="53" text-anchor="middle" font-size="13" font-weight="700" fill="#059669">APScheduler</text>
+  <text x="500" y="71" text-anchor="middle" font-size="10" fill="#6b7280">interval run (default 15 min) · daily eval cron at 00:00 UTC</text>
+
+  <!-- ── PER-APP LOOP BRACKET ── -->
+  <rect x="10" y="105" width="860" height="330" rx="10" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <rect x="22" y="97" width="178" height="18" rx="4" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+  <text x="111" y="110" text-anchor="middle" font-size="10" font-weight="600" fill="#6b7280">for each enabled app</text>
+
+  <!-- APScheduler → per-app loop -->
+  <line x1="500" y1="82" x2="500" y2="105" stroke="#374151" stroke-width="1.5" marker-end="url(#mDark)"/>
+
+  <!-- APScheduler fan-out to three agents inside loop -->
+  <path d="M 500 108 L 500 120 L 243 120 L 243 135" stroke="#374151" stroke-width="1.5" fill="none" marker-end="url(#mDark)"/>
+  <path d="M 500 108 L 500 135" stroke="#374151" stroke-width="1.5" fill="none" marker-end="url(#mDark)"/>
+  <path d="M 500 108 L 500 120 L 657 120 L 657 135" stroke="#374151" stroke-width="1.5" fill="none" marker-end="url(#mDark)"/>
+
+  <!-- ── RATE LIMITER DB (read-only source) ── -->
+  <rect x="18" y="135" width="160" height="100" rx="10" fill="white" stroke="#3b82f6" stroke-width="2"/>
+  <text x="98" y="157" text-anchor="middle" font-size="12" font-weight="700" fill="#3b82f6">Rate Limiter DB</text>
+  <text x="98" y="174" text-anchor="middle" font-size="10" fill="#374151" font-weight="500">read-only · PostgreSQL</text>
+  <text x="98" y="190" text-anchor="middle" font-size="10" fill="#6b7280">rate_limit_log</text>
+  <text x="98" y="206" text-anchor="middle" font-size="10" fill="#6b7280">app_info · rate_limit_plan</text>
+  <text x="98" y="221" text-anchor="middle" font-size="9" fill="#9ca3af">per_ip_address flag per app</text>
+  <text x="98" y="232" text-anchor="middle" font-size="9" fill="#9ca3af">no writes · no migrations</text>
+
+  <!-- Rate Limiter DB → each agent (horizontal, fanned) -->
+  <line x1="178" y1="165" x2="198" y2="165" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#mBlue)"/>
+  <path d="M 178 185 L 188 185 L 188 172 L 415 172 L 415 165 L 428 165" stroke="#3b82f6" stroke-width="1.5" fill="none" marker-end="url(#mBlue)"/>
+  <path d="M 178 200 L 188 200 L 188 172 L 628 172 L 628 165 L 642 165" stroke="#3b82f6" stroke-width="1.5" fill="none" marker-end="url(#mBlue)"/>
+
+  <!-- ── ERROR PATTERN AGENT ── -->
+  <rect x="200" y="135" width="160" height="100" rx="10" fill="white" stroke="#ea580c" stroke-width="2"/>
+  <text x="280" y="157" text-anchor="middle" font-size="11" font-weight="700" fill="#ea580c">① Error Pattern</text>
+  <text x="280" y="173" text-anchor="middle" font-size="10" fill="#374151" font-weight="500">15 min window</text>
+  <text x="280" y="188" text-anchor="middle" font-size="10" fill="#6b7280">block rate · error rate</text>
+  <text x="280" y="203" text-anchor="middle" font-size="10" fill="#6b7280">4xx / 5xx distribution</text>
+  <text x="280" y="218" text-anchor="middle" font-size="9" fill="#9ca3af">critical if 5xx or error &gt; 50%</text>
+  <text x="280" y="232" text-anchor="middle" font-size="9" fill="#9ca3af">↓ writes AgentResult to agent DB</text>
+
+  <!-- ── TOKEN BUCKET HEALTH AGENT ── -->
+  <rect x="430" y="135" width="160" height="100" rx="10" fill="white" stroke="#ea580c" stroke-width="2"/>
+  <text x="510" y="157" text-anchor="middle" font-size="11" font-weight="700" fill="#ea580c">② Token Bucket</text>
+  <text x="510" y="173" text-anchor="middle" font-size="10" fill="#374151" font-weight="500">15 min window</text>
+  <text x="510" y="188" text-anchor="middle" font-size="10" fill="#6b7280">near-depletion % of requests</text>
+  <text x="510" y="203" text-anchor="middle" font-size="10" fill="#6b7280">zero-token request count</text>
+  <text x="510" y="218" text-anchor="middle" font-size="9" fill="#9ca3af">critical if &gt;70% near-depleted</text>
+  <text x="510" y="232" text-anchor="middle" font-size="9" fill="#9ca3af">↓ writes AgentResult to agent DB</text>
+
+  <!-- ── TOP PATHS AGENT ── -->
+  <rect x="644" y="135" width="160" height="100" rx="10" fill="white" stroke="#ea580c" stroke-width="2"/>
+  <text x="724" y="157" text-anchor="middle" font-size="11" font-weight="700" fill="#ea580c">③ Top Paths</text>
+  <text x="724" y="173" text-anchor="middle" font-size="10" fill="#374151" font-weight="500">60 min window</text>
+  <text x="724" y="188" text-anchor="middle" font-size="10" fill="#6b7280">block rate per endpoint</text>
+  <text x="724" y="203" text-anchor="middle" font-size="10" fill="#6b7280">traffic concentration</text>
+  <text x="724" y="218" text-anchor="middle" font-size="9" fill="#9ca3af">critical if block &gt;80% on any path</text>
+  <text x="724" y="232" text-anchor="middle" font-size="9" fill="#9ca3af">↓ writes AgentResult to agent DB</text>
+
+  <!-- Each agent → LLM (dashed) -->
+  <line x1="360" y1="185" x2="888" y2="185" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#mPurple)"/>
+  <line x1="590" y1="195" x2="888" y2="195" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#mPurple)"/>
+  <line x1="804" y1="185" x2="888" y2="185" stroke="#7c3aed" stroke-width="0" /><!-- covered by first line -->
+
+  <!-- ── LLM ── -->
+  <rect x="890" y="130" width="98" height="115" rx="10" fill="white" stroke="#7c3aed" stroke-width="2"/>
+  <text x="939" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#7c3aed">LLM</text>
+  <text x="939" y="169" text-anchor="middle" font-size="9.5" fill="#374151" font-weight="500">Claude / OpenAI</text>
+  <text x="939" y="184" text-anchor="middle" font-size="9" fill="#6b7280">structured prompt</text>
+  <text x="939" y="198" text-anchor="middle" font-size="9" fill="#6b7280">fixed-format output</text>
+  <text x="939" y="212" text-anchor="middle" font-size="9" fill="#6b7280">retry + backoff</text>
+  <text x="939" y="227" text-anchor="middle" font-size="8.5" fill="#9ca3af">×4 calls per run</text>
+
+  <!-- LLM also called by orchestrator (shown later) -->
+
+  <!-- Agents → Orchestrator (converging arrows) -->
+  <path d="M 280 235 L 280 300 L 440 300 L 440 315" stroke="#374151" stroke-width="1.5" fill="none" marker-end="url(#mDark)"/>
+  <path d="M 510 235 L 510 300 L 490 300 L 490 315" stroke="#374151" stroke-width="1.5" fill="none" marker-end="url(#mDark)"/>
+  <path d="M 724 235 L 724 300 L 540 300 L 540 315" stroke="#374151" stroke-width="1.5" fill="none" marker-end="url(#mDark)"/>
+  <rect x="370" y="290" width="140" height="16" rx="3" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="440" y="302" text-anchor="middle" font-size="10" font-weight="600" fill="#374151">3 AgentResults</text>
+
+  <!-- ── ORCHESTRATOR ── -->
+  <rect x="330" y="317" width="250" height="100" rx="10" fill="white" stroke="#111827" stroke-width="2"/>
+  <text x="455" y="339" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">④ Orchestrator</text>
+  <text x="455" y="356" text-anchor="middle" font-size="10" fill="#374151" font-weight="500">rule-based escalation → LLM verdict</text>
+  <text x="455" y="372" text-anchor="middle" font-size="10" fill="#6b7280">reads baseline + recent history first</text>
+  <text x="455" y="388" text-anchor="middle" font-size="10" fill="#6b7280">critical / high / medium / low / none</text>
+  <text x="455" y="404" text-anchor="middle" font-size="9" fill="#9ca3af">block · throttle · alert · monitor</text>
+  <text x="455" y="416" text-anchor="middle" font-size="9" fill="#9ca3af">↓ writes OrchestratorResult + updates baseline</text>
+
+  <!-- Orchestrator → LLM -->
+  <path d="M 580 367 L 888 220" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,3" fill="none" marker-end="url(#mPurple)"/>
+
+  <!-- ── AGENT DB ── -->
+  <rect x="660" y="460" width="220" height="125" rx="10" fill="white" stroke="#4f46e5" stroke-width="2"/>
+  <text x="770" y="483" text-anchor="middle" font-size="13" font-weight="700" fill="#4f46e5">Agent DB</text>
+  <text x="770" y="500" text-anchor="middle" font-size="10" fill="#374151" font-weight="500">PostgreSQL · read-write</text>
+  <text x="770" y="517" text-anchor="middle" font-size="10" fill="#6b7280">agent_results (per specialist)</text>
+  <text x="770" y="533" text-anchor="middle" font-size="10" fill="#6b7280">orchestrator_results</text>
+  <text x="770" y="549" text-anchor="middle" font-size="10" fill="#6b7280">baseline_memory (7-day rolling)</text>
+  <text x="770" y="565" text-anchor="middle" font-size="10" fill="#6b7280">eval_run_results (accuracy log)</text>
+  <text x="770" y="581" text-anchor="middle" font-size="9" fill="#9ca3af">Alembic migrations on startup</text>
+
+  <!-- Three agents each write to Agent DB (converging to one labeled write arrow) -->
+  <path d="M 280 235 L 280 250 L 770 250 L 770 458" stroke="#4f46e5" stroke-width="1" stroke-dasharray="3,2" fill="none" marker-end="url(#mIndigo)"/>
+  <rect x="714" y="240" width="116" height="16" rx="3" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="772" y="252" text-anchor="middle" font-size="9.5" font-weight="600" fill="#4f46e5">write AgentResult ×3</text>
+
+  <!-- Orchestrator → Agent DB (write results + update baseline) -->
+  <path d="M 550 417 L 550 520 L 658 520" stroke="#4f46e5" stroke-width="1.5" fill="none" marker-end="url(#mIndigo)"/>
+  <rect x="530" y="457" width="120" height="16" rx="3" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="590" y="469" text-anchor="middle" font-size="10" font-weight="600" fill="#4f46e5">write + update</text>
+
+  <!-- Agent DB → Orchestrator (baseline + history, dashed back-arrow) -->
+  <path d="M 660 490 L 620 490 L 620 367 L 582 367" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#mGray)"/>
+  <rect x="600" y="420" width="130" height="16" rx="3" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="665" y="432" text-anchor="middle" font-size="9.5" fill="#9ca3af">baseline + recent history</text>
+
+  <!-- ── DAILY EVAL ── -->
+  <rect x="18" y="460" width="200" height="110" rx="10" fill="white" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="118" y="483" text-anchor="middle" font-size="12" font-weight="700" fill="#059669">Daily Eval Runner</text>
+  <text x="118" y="500" text-anchor="middle" font-size="10" fill="#374151" font-weight="500">cron · 00:00 UTC</text>
+  <text x="118" y="516" text-anchor="middle" font-size="10" fill="#6b7280">5 labeled scenarios</text>
+  <text x="118" y="532" text-anchor="middle" font-size="10" fill="#6b7280">isolated SQLite :memory:</text>
+  <text x="118" y="548" text-anchor="middle" font-size="10" fill="#6b7280">runs full pipeline per scenario</text>
+  <text x="118" y="564" text-anchor="middle" font-size="9" fill="#9ca3af">severity + action accuracy %</text>
+
+  <!-- Daily Eval → Agent DB -->
+  <path d="M 218 520 L 658 540" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#mGreen)"/>
+  <rect x="340" y="516" width="120" height="16" rx="3" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="400" y="528" text-anchor="middle" font-size="9.5" fill="#9ca3af">eval_run_results</text>
+
+  <!-- APScheduler → Daily Eval (daily cron) -->
+  <path d="M 330 57 L 118 57 L 118 458" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#mGreen)"/>
+  <rect x="178" y="44" width="72" height="17" rx="3" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="214" y="56" text-anchor="middle" font-size="10" fill="#6b7280">daily cron</text>
+
+</svg>

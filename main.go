@@ -1,18 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type PageData struct {
 	Name    string
 	Title   string
 	Tagline string
+	Version string
 }
 
 var tmpl *template.Template
@@ -32,6 +35,7 @@ var defaultData = PageData{
 	Name:    "Raviteja",
 	Title:   "Software Engineer",
 	Tagline: "Building reliable systems and clean interfaces.",
+	Version: fmt.Sprintf("%d", time.Now().UnixMilli()),
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -52,6 +56,13 @@ func rateLimiterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func rateLimiterAgentsHandler(w http.ResponseWriter, r *http.Request) {
+	if err := tmpl.ExecuteTemplate(w, "rate-limiter-agents.html", defaultData); err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		log.Printf("template error: %v", err)
+	}
+}
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -60,6 +71,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	mux.HandleFunc("/projects/rate-limiter-agents", rateLimiterAgentsHandler)
 	mux.HandleFunc("/projects/rate-limiter", rateLimiterHandler)
 	mux.HandleFunc("/", indexHandler)
 
