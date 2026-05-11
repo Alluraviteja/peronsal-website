@@ -28,7 +28,8 @@
 
     <div class="page-hero">
       <h1><span class="page-hero-icon">⏱️</span> Rate Limiter</h1>
-      <p>A standalone rate limiting service built with Spring Boot. Rather than baking limits into every API, this runs as a shared component — any upstream gateway can call it, get a yes/no back, and forward the result to the client as standard rate-limit headers.</p>
+      <p>A distributed rate limiting service built with Spring Boot and Redis. Instead of embedding rate limiting logic into every API or gateway, this runs as a centralized service that any upstream system can call. The response includes standard rate limit metadata that callers can forward directly to clients.</p>
+      <p>Most API gateways support rate limiting, but those limits are often tied to a single gateway instance or vendor platform. This service centralizes enforcement so multiple gateways and services can share the same policies.</p>
       <div class="proj-tags">
         <span class="proj-tag">Spring Boot</span>
         <span class="proj-tag">Token Bucket</span>
@@ -47,8 +48,8 @@
     <section class="content-section" id="overview">
       <p class="section-label">Overview</p>
       <h2>What It Does</h2>
-      <p>You register an app, assign it a rate limit plan, and this service does the rest. When a request comes in, the caller sends a service identifier and client IP; the service checks the token bucket in Redis and responds with <code>allowed</code>, <code>remaining tokens</code>, and <code>retry-after</code>. The caller can pass those straight back as <code>RateLimit-*</code> headers — no extra work on their end.</p>
-      <p>Every decision — allowed or blocked — gets written to PostgreSQL with the full request context: IP, path, HTTP method, device type, browser, OS, and whether it looked like a bot. That audit log makes it straightforward to investigate abuse or tune limits after the fact.</p>
+      <p>You register an app, assign it a rate limit plan, and this service does the rest. When a request comes in, the caller sends a service identifier, client IP, and request path; the service checks the token bucket in Redis and responds with <code>allowed</code>, <code>remaining tokens</code>, and <code>reset-after</code>. Callers can forward those values directly as <code>RateLimit-*</code> headers.</p>
+      <p>Every decision (allowed or blocked) gets written to PostgreSQL with the full request context: IP, path, HTTP method, device type, browser, OS, user agent classification, and basic bot detection signals. That audit log makes it straightforward to investigate abuse or tune limits after the fact.</p>
     </section>
 
     <section class="content-section" id="algorithm">
@@ -61,10 +62,10 @@
           <h3>Token Bucket (Bucket4j + Redis)</h3>
           <p>Each app gets a bucket with a capacity ceiling and a steady refill rate. Incoming requests spend tokens; once the bucket is empty, requests are blocked until tokens refill.</p>
           <ul>
-            <li>Handles short bursts — callers can spend up to the full capacity before hitting the limit</li>
-            <li>Greedy refill — tokens trickle back in continuously rather than all at once</li>
-            <li>Bucket state lives in Redis — consistent across every running instance</li>
-            <li>Read-modify-write is a single atomic Lua script — no race conditions under concurrency</li>
+            <li>Handles short bursts: callers can spend up to the full capacity before hitting the limit</li>
+            <li>Continuous refill: tokens are restored steadily over time instead of resetting in fixed intervals</li>
+            <li>Bucket state lives in Redis, consistent across every running instance</li>
+            <li>Read-modify-write is a single atomic Lua script, so no race conditions under concurrency</li>
           </ul>
         </div>
       </div>
@@ -73,7 +74,7 @@
     <section class="content-section" id="architecture">
       <p class="section-label">Architecture</p>
       <h2>How It's Wired Together</h2>
-      <p>Kept the data model intentionally split: Redis holds live token counts with a TTL matching each plan's refill period — nothing lingers longer than it needs to. PostgreSQL holds the durable stuff: app registrations, rate limit plans, and the full audit log. Spring Boot wires the two together and exposes the HTTP API.</p>
+      <p>Kept the data model intentionally split: Redis holds live token counts with a TTL matching each plan's refill period; keys expire automatically when the window closes, so stale buckets never accumulate. PostgreSQL holds the durable stuff: app registrations, rate limit plans, and the full audit log. Spring Boot wires the two together and exposes the HTTP API.</p>
       <img
         src="/static/img/rate-limiter-arch.svg"
         alt="Architecture diagram: Client Request → Spring Boot API → Redis (Bucket4j token bucket) and PostgreSQL (config + audit)"
@@ -85,30 +86,157 @@
     <section class="content-section" id="design">
       <p class="section-label">Implementation</p>
       <h2>Key Design Decisions</h2>
-      <div class="highlight-grid">
+      <div class="decision-list">
         <div class="highlight-card">
           <h3>Atomic Lua Scripts</h3>
-          <p>The problem with distributed rate limiting is the read-modify-write gap. If two nodes both read "one token left" before either writes back, both requests slip through. Bucket4j solves this by sending the entire check — read, refill, decrement, write — as a single Lua script. Redis executes Lua atomically, so no two requests can interleave on the same key.</p>
+          <ul>
+            <li><strong>Problem:</strong> If two nodes both read "one token left" before either writes back, both requests slip through.</li>
+            <li><strong>Solution:</strong> Bucket4j sends the entire check (read, refill, decrement, write) as a single Lua script. Redis executes Lua atomically, so no two requests can interleave on the same key.</li>
+            <li><strong>Tradeoff:</strong> Each request becomes a serialized operation per bucket key. Worth it for correctness, but worth knowing under very high contention on a single key.</li>
+          </ul>
         </div>
         <div class="highlight-card">
           <h3>Lettuce Async Client</h3>
-          <p>Lettuce multiplexes many concurrent requests over one connection, so Redis calls don't block threads while waiting on the network. Under load, that adds up — one shared connection handles everything without the pool pressure you'd see with a blocking client.</p>
+          <p>Lettuce multiplexes many concurrent requests over one connection, so Redis calls don't block threads while waiting on the network. Under load, that adds up: one shared connection handles everything without the pool pressure you'd see with a blocking client.</p>
         </div>
         <div class="highlight-card">
           <h3>Config-Driven Plans</h3>
-          <p>Each app's capacity, refill rate, and refill window are stored in PostgreSQL and loaded lazily on first use, then held in an in-process cache. Updating a plan in the database takes effect on the next request with no restart needed. The cache can also be flushed manually via an admin endpoint.</p>
+          <ul>
+            <li>Each app's capacity, refill rate, and refill window are stored in PostgreSQL.</li>
+            <li>Loaded lazily on first use, then held in an in-process cache to avoid repeated DB lookups on hot paths.</li>
+            <li>Cache can be invalidated via an admin endpoint when configs change, no service restart required.</li>
+          </ul>
         </div>
         <div class="highlight-card">
           <h3>Per-IP or Per-App Limiting</h3>
-          <p>When registering an app you choose how quota is scoped. Per-app mode gives the whole service a single shared bucket — good for capping total throughput. Per-IP mode gives each caller their own — better for public-facing APIs where you don't want one client exhausting everyone else's quota. The bucket key in Redis changes based on that flag.</p>
+          <ul>
+            <li><strong>Per-app:</strong> the whole service shares one bucket, good for capping total throughput. Key: <code>rate_limit:{appId}:{matchedPattern}</code></li>
+            <li><strong>Per-IP:</strong> each caller gets their own bucket, better for public APIs where one client shouldn't exhaust everyone else's quota. Key: <code>rate_limit:{appId}:{matchedPattern}:{clientIp}</code></li>
+            <li><code>appId</code> is the numeric database ID of the registered app, not the human-readable service name.</li>
+          </ul>
         </div>
         <div class="highlight-card">
           <h3>Circuit Breaker &amp; Retry</h3>
-          <p>Redis calls go through Resilience4j — a retry layer for transient blips (two attempts, 50ms apart, only on Redis exceptions) and a count-based circuit breaker that trips when 50% of calls fail over a 20-request window. Once open, it waits 10 seconds before testing again. The goal is to stop hammering a Redis instance that's clearly down and recover automatically when it comes back.</p>
+          <ul>
+            <li><strong>Retry:</strong> two attempts, 50ms apart, only on Redis exceptions.</li>
+            <li><strong>Circuit breaker:</strong> trips when 50% of calls fail over a 20-request window.</li>
+            <li>Once open, waits 10 seconds before testing again.</li>
+            <li>Goal: stop hammering a Redis instance that's down and recover automatically when it comes back.</li>
+          </ul>
         </div>
         <div class="highlight-card">
           <h3>Fail-Open / Fail-Closed</h3>
-          <p>If Redis is unreachable and retries are exhausted, each app has a flag controlling what happens next. Fail-open lets the request through — availability matters more than enforcement. Fail-closed returns a 503 — correctness matters more. Both outcomes are logged so you can see how often the fallback is actually firing in production.</p>
+          <ul>
+            <li><strong>Fail-open:</strong> lets the request through. Prioritizes availability over enforcement.</li>
+            <li><strong>Fail-closed:</strong> returns a 503. Prioritizes correctness over availability.</li>
+            <li>Configured per-app in the database, not as a global setting — different services can have different failure behavior depending on how critical enforcement is for them.</li>
+            <li>Both outcomes are logged so you can see how often the fallback actually fires in production.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section" id="api">
+      <p class="section-label">API</p>
+      <h2>Request &amp; Response</h2>
+      <p>Three fields are required; everything else is optional context used for logging and future policy extensions. The response body maps directly to standard <code>RateLimit-*</code> headers.</p>
+
+      <details class="code-collapsible">
+        <summary class="code-block-header">
+          <span class="code-block-label"><span class="collapse-chevron">▸</span>Request</span>
+          <button class="copy-btn" aria-label="Copy code">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            copy
+          </button>
+        </summary>
+        <pre class="code-block"><code data-highlight="http">POST /api/v1/ratelimit/check
+
+{
+  "serviceIdentifier": "payments-api",
+  "clientIp": "203.0.113.42",
+  "requestPath": "/api/checkout",
+  "httpMethod": "POST",
+  "traceId": "abc-123-def-456",
+  "deviceType": "desktop",
+  "isBot": false,
+  "botName": null,
+  "browser": "Chrome",
+  "os": "Windows",
+  "requestSize": 512,
+  "referer": "https://google.com"
+}</code></pre>
+        <p class="field-notes">
+          <span class="badge-required">Required</span> serviceIdentifier, clientIp, requestPath<br>
+          <span class="badge-optional">Optional</span> httpMethod, traceId, deviceType, isBot, botName, browser, os, requestSize, referer<br>
+        </p>
+      </details>
+
+      <details class="code-collapsible" style="margin-top: 1.25rem;">
+        <summary class="code-block-header">
+          <span class="code-block-label"><span class="collapse-chevron">▸</span>Response · 200 OK</span>
+          <button class="copy-btn" aria-label="Copy code">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            copy
+          </button>
+        </summary>
+        <pre class="code-block"><code data-highlight="http-response">HTTP/1.1 200 OK
+RateLimit-Limit: 100
+RateLimit-Remaining: 42
+RateLimit-Reset: 12
+Content-Type: application/json
+
+{
+  "serviceName": "payments-api",
+  "allowed": true,
+  "remainingTokens": 42,
+  "limit": 100,
+  "resetAfterSeconds": 12,
+  "matchedPattern": "/api/**",
+  "timestamp": "2025-05-10T14:23:01.456Z"
+}</code></pre>
+      </details>
+
+      <details class="code-collapsible" style="margin-top: 0.75rem;">
+        <summary class="code-block-header">
+          <span class="code-block-label"><span class="collapse-chevron">▸</span>Response · 429 Too Many Requests</span>
+          <button class="copy-btn" aria-label="Copy code">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            copy
+          </button>
+        </summary>
+        <pre class="code-block"><code data-highlight="http-response">HTTP/1.1 429 Too Many Requests
+RateLimit-Limit: 100
+RateLimit-Remaining: 0
+RateLimit-Reset: 12
+Retry-After: 12
+Content-Type: application/json
+
+{
+  "error": "rate_limit_exceeded",
+  "code": 429,
+  "message": "Too many requests",
+  "retryAfterSeconds": 12,
+  "timestamp": "2025-05-10T14:23:01.456Z"
+}</code></pre>
+      </details>
+    </section>
+
+    <section class="content-section" id="performance">
+      <p class="section-label">Performance</p>
+      <h2>Measured Under Load</h2>
+      <p>Numbers from local load testing with k6 against a single Docker Compose stack (Spring Boot + Redis on the same machine). Real-world throughput scales with Redis network latency.</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">~15k req/s</div>
+          <div class="stat-label">Single-instance throughput</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">&lt; 5ms</div>
+          <div class="stat-label">Redis check latency (p95)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">No inconsistencies</div>
+          <div class="stat-label">Observed during concurrent load testing</div>
         </div>
       </div>
     </section>
@@ -131,5 +259,71 @@
   </footer>
 
   <script src="/static/js/main.js" defer></script>
+  <script>
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function highlightJSON(raw) {
+      return escapeHtml(raw).replace(
+        /("(?:[^"\\]|\\.)*")\s*:|:\s*("(?:[^"\\]|\\.)*")|(true|false|null)|([\d.]+)/g,
+        (m, key, str, bool, num) => {
+          if (key)  return `<span class="json-key">${key}</span>:`;
+          if (str)  return `: <span class="json-str">${str}</span>`;
+          if (bool) return `<span class="json-bool">${bool}</span>`;
+          if (num)  return `<span class="json-num">${num}</span>`;
+          return m;
+        }
+      );
+    }
+
+    function highlightHTTP(raw) {
+      return raw.replace(/^(POST|GET|PUT|DELETE|PATCH)(\s+)(\S+)/,
+        (_, method, sp, path) =>
+          `<span class="http-method">${method}</span>${sp}<span class="http-path">${escapeHtml(path)}</span>`
+      ).replace(/\n([\s\S]*)/, (_, rest) => '\n' + highlightJSON(rest));
+    }
+
+    function highlightHTTPResponse(raw) {
+      const sep = raw.indexOf('\n\n');
+      const headerBlock = sep !== -1 ? raw.slice(0, sep) : raw;
+      const body = sep !== -1 ? raw.slice(sep + 2) : '';
+      const headers = headerBlock.split('\n').map((line, i) => {
+        if (i === 0) {
+          return line.replace(/^(HTTP\/[\d.]+)\s+(\d+)(.*)$/,
+            (_, proto, code, rest) =>
+              `<span class="http-proto">${escapeHtml(proto)}</span> <span class="${code[0] === '2' ? 'http-status-ok' : 'http-status-err'}">${code}${escapeHtml(rest)}</span>`
+          );
+        }
+        return line.replace(/^([^:]+):([\s\S]*)$/,
+          (_, name, val) => `<span class="http-header-name">${escapeHtml(name)}</span>:<span class="http-header-val">${escapeHtml(val)}</span>`
+        );
+      }).join('\n');
+      return body ? headers + '\n\n' + highlightJSON(body) : headers;
+    }
+
+    document.querySelectorAll('code[data-highlight]').forEach(el => {
+      const raw = el.textContent;
+      const type = el.dataset.highlight;
+      if (type === 'http')          el.innerHTML = highlightHTTP(raw);
+      else if (type === 'http-response') el.innerHTML = highlightHTTPResponse(raw);
+      else                          el.innerHTML = highlightJSON(raw);
+    });
+
+    document.querySelectorAll('.code-collapsible .copy-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const code = btn.closest('.code-collapsible').querySelector('code');
+        navigator.clipboard.writeText(code.textContent).then(() => {
+          btn.innerHTML = btn.innerHTML.replace('copy', 'copied!');
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.innerHTML = btn.innerHTML.replace('copied!', 'copy');
+            btn.classList.remove('copied');
+          }, 1800);
+        });
+      });
+    });
+  </script>
 </body>
 </html>
