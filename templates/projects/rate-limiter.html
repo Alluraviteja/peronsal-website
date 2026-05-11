@@ -110,9 +110,9 @@
         <div class="highlight-card">
           <h3>Per-IP or Per-App Limiting</h3>
           <ul>
-            <li><strong>Per-app:</strong> the whole service shares one bucket, good for capping total throughput. Key: <code>rate_limit:{appId}:{matchedPattern}</code></li>
-            <li><strong>Per-IP:</strong> each caller gets their own bucket, better for public APIs where one client shouldn't exhaust everyone else's quota. Key: <code>rate_limit:{appId}:{matchedPattern}:{clientIp}</code></li>
-            <li><code>appId</code> is the numeric database ID of the registered app, not the human-readable service name.</li>
+            <li><span><strong>Per-app:</strong> the whole service shares one bucket, good for capping total throughput. Key: <code>rate_limit:{appId}:{matchedPattern}</code></span></li>
+            <li><span><strong>Per-IP:</strong> each caller gets their own bucket, better for public APIs where one client shouldn't exhaust everyone else's quota. Key: <code>rate_limit:{appId}:{matchedPattern}:{clientIp}</code></span></li>
+            <li><span><code>appId</code> is the numeric database ID of the registered app, not the human-readable service name.</span></li>
           </ul>
         </div>
         <div class="highlight-card">
@@ -129,7 +129,7 @@
           <ul>
             <li><strong>Fail-open:</strong> lets the request through. Prioritizes availability over enforcement.</li>
             <li><strong>Fail-closed:</strong> returns a 503. Prioritizes correctness over availability.</li>
-            <li>Configured per-app in the database, not as a global setting — different services can have different failure behavior depending on how critical enforcement is for them.</li>
+            <li>Configured per-app in the database, not as a global setting different services can have different failure behavior depending on how critical enforcement is for them.</li>
             <li>Both outcomes are logged so you can see how often the fallback actually fires in production.</li>
           </ul>
         </div>
