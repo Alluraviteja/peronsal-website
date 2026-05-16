@@ -42,6 +42,8 @@
         <span class="proj-tag">Docker</span>
         <span class="proj-tag">Resilience4j</span>
         <span class="proj-tag">CI/CD</span>
+        <span class="proj-tag">Spring AI MCP</span>
+        <span class="proj-tag">SSE</span>
       </div>
     </div>
 
@@ -74,7 +76,7 @@
     <section class="content-section" id="architecture">
       <p class="section-label">Architecture</p>
       <h2>How It's Wired Together</h2>
-      <p>Kept the data model intentionally split: Redis holds live token counts with a TTL matching each plan's refill period; keys expire automatically when the window closes, so stale buckets never accumulate. PostgreSQL holds the durable stuff: app registrations, rate limit plans, and the full audit log. Spring Boot wires the two together and exposes the HTTP API.</p>
+      <p>Kept the data model intentionally split: Redis holds live token counts with TTLs based on bucket refill configuration; inactive keys expire automatically so stale buckets never accumulate. PostgreSQL holds the durable stuff: app registrations, rate limit plans, and the full audit log. Spring Boot wires the two together and exposes the HTTP API.</p>
       <img
         src="/static/img/rate-limiter-archi.svg"
         alt="Architecture diagram: Client Request → Spring Boot API → Redis (Bucket4j token bucket) and PostgreSQL (config + audit)"
@@ -92,12 +94,12 @@
           <ul>
             <li><strong>Problem:</strong> If two nodes both read "one token left" before either writes back, both requests slip through.</li>
             <li><strong>Solution:</strong> Bucket4j sends the entire check (read, refill, decrement, write) as a single Lua script. Redis executes Lua atomically, so no two requests can interleave on the same key.</li>
-            <li><strong>Tradeoff:</strong> Each request becomes a serialized operation per bucket key. Worth it for correctness, but worth knowing under very high contention on a single key.</li>
+            <li><strong>Tradeoff:</strong> Operations against the same bucket key are effectively serialized to preserve correctness, while different bucket keys are processed independently. Worth knowing under very high contention on a single key.</li>
           </ul>
         </div>
         <div class="highlight-card">
           <h3>Lettuce Async Client</h3>
-          <p>Lettuce multiplexes many concurrent requests over one connection, so Redis calls don't block threads while waiting on the network. Under load, that adds up: one shared connection handles everything without the pool pressure you'd see with a blocking client.</p>
+          <p>Lettuce can multiplex many concurrent requests over a small number of shared connections, so Redis calls don't block threads while waiting on the network. Under load, that adds up: fewer connections handle everything without the pool pressure you'd see with a blocking client.</p>
         </div>
         <div class="highlight-card">
           <h3>Config-Driven Plans</h3>
@@ -129,10 +131,58 @@
           <ul>
             <li><strong>Fail-open:</strong> lets the request through. Prioritizes availability over enforcement.</li>
             <li><strong>Fail-closed:</strong> returns a 503. Prioritizes correctness over availability.</li>
-            <li>Configured per-app in the database, not as a global setting different services can have different failure behavior depending on how critical enforcement is for them.</li>
+            <li>Configured per-app in the database rather than as a global setting, so different services can choose different failure behavior depending on how critical enforcement is for them.</li>
             <li>Both outcomes are logged so you can see how often the fallback actually fires in production.</li>
           </ul>
         </div>
+      </div>
+    </section>
+
+    <section class="content-section" id="mcp">
+      <p class="section-label">MCP Server</p>
+      <h2>AI-Accessible Observability</h2>
+      <p>The service exposes its internal data through a Model Context Protocol (MCP) server so any third-party application or agent system can query rate limiter state without holding direct database credentials or knowing the internal schema. Any MCP-compatible client — whether an AI assistant, an internal monitoring tool, or a custom agent pipeline — can connect and call these tools over the network.</p>
+      <p>Spring AI's MCP support handles all the transport wiring. Each tool is a plain Spring bean method annotated with <code>@Tool</code>; Spring AI registers them over HTTP/SSE transport automatically. There are 10 tools across 4 groups, all read-only.</p>
+      <div class="decision-list">
+        <div class="highlight-card">
+          <h3>Audit Log Tools</h3>
+          <p>Exposes <code>rate_limit_log</code> table data with time-window filtering. This is the highest-priority group — agents need recent logs to compute their metrics and cannot do so efficiently through the existing paginated REST endpoint.</p>
+          <ul>
+            <li><code>get_recent_logs</code> — raw log entries for an app within N minutes, up to 5 000 records; includes IP, path, HTTP method, remaining tokens, response code, bot signals, and Redis failure flag</li>
+            <li><code>get_error_summary</code> — block rate, response-code breakdown, top error paths, top block reasons, unique IPs, IP concentration percentage, and Redis failure count</li>
+            <li><code>get_token_health_summary</code> — average, min, and max remaining tokens; depletion and near-depletion (≤10% capacity) counts; per-path token consumption; IPs near or at depletion</li>
+            <li><code>get_top_paths_summary</code> — top 10 paths by traffic and top 5 by block rate over a 60-minute window, with per-path method and IP breakdown</li>
+          </ul>
+        </div>
+        <div class="highlight-card">
+          <h3>App Registry Tools</h3>
+          <p>Exposes <code>app_info</code> and <code>rate_limit_plan</code> records so agents know which apps exist, what their limits are, and whether per-IP mode is active.</p>
+          <ul>
+            <li><code>list_apps</code> — all enabled apps; the agent scheduler calls this at the start of every run to decide what to analyze</li>
+            <li><code>get_app</code> — single app with all active plans; gives the orchestrator agent the capacity, refill rate, refill window, and per-IP flag it needs to frame the analysis</li>
+          </ul>
+        </div>
+        <div class="highlight-card">
+          <h3>Real-time Bucket State Tools</h3>
+          <p>Exposes live Redis bucket state — data only this service can provide since it is never written to PostgreSQL. Agents currently only see historical <code>remaining_tokens</code> from the audit log; these tools give them the actual current state.</p>
+          <ul>
+            <li><code>get_bucket_state</code> — current token count for a specific app's bucket(s) read directly from Redis via <code>SCAN</code> (cursor-based, avoids blocking the server; trades exact instantaneous consistency for operational safety); shows depletion percentage and near-depletion flag per key; capped at 100 buckets in per-IP mode</li>
+            <li><code>get_all_bucket_states</code> — system-wide snapshot per app: total active bucket keys, depleted count, near-depletion count, and average remaining percentage</li>
+          </ul>
+        </div>
+        <div class="highlight-card">
+          <h3>Service Health Tools</h3>
+          <p>Exposes the operational state of the service itself. Agents check this before interpreting results — a low block rate during a Redis outage in fail-open mode should not be treated as healthy traffic.</p>
+          <ul>
+            <li><code>get_service_health</code> — database and Redis connection status (<code>ok</code> / <code>error: {message}</code>), configured failure strategy, and timestamp</li>
+            <li><code>get_redis_failure_stats</code> — count and percentage of requests served under Redis failure in the last N minutes; includes an interpretation string when fail-open distorts block rates</li>
+          </ul>
+        </div>
+      </div>
+      <div class="highlight-card" style="margin-top: 1.25rem;">
+        <h3>Transport &amp; Auth</h3>
+        <p>The MCP server runs over <strong>HTTP/SSE</strong> transport — the right choice for a standalone Spring Boot service that agents reach over the network. No subprocess or stdio needed; the agent project connects by URL.</p>
+        <p>All MCP routes are gated by a shared-secret filter. Requests to <code>/mcp/**</code> must include an <code>X-MCP-Secret</code> header matching the value in <code>application.yml</code>. Requests with a missing or invalid secret are rejected with 401 by a servlet filter before reaching the MCP handlers.</p>
       </div>
     </section>
 
