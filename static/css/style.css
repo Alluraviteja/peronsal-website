@@ -237,7 +237,7 @@ section { padding: var(--sp-12) var(--sp-4); max-width: 900px; margin: 0 auto; }
 .skill-tag:hover { border-color: var(--accent); color: var(--accent); background: rgba(5,150,105,0.04); }
 
 /* ── PROJECTS ── */
-.projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--sp-3); }
+.projects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
 .project-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -251,6 +251,7 @@ section { padding: var(--sp-12) var(--sp-4); max-width: 900px; margin: 0 auto; }
 .project-card .proj-icon { font-size: 1.25rem; line-height: 1; flex-shrink: 0; }
 .project-card h3 { font-size: var(--text-base); font-weight: 600; margin-bottom: var(--sp-1); display: flex; align-items: center; gap: 0.4rem; }
 .project-card p { font-size: var(--text-sm); color: var(--muted); margin-bottom: var(--sp-2); line-height: 1.6; flex: 1; }
+.proj-points { font-size: var(--text-sm); color: var(--muted); margin: 0 0 var(--sp-2) var(--sp-2); padding: 0; line-height: 1.6; flex: 1; list-style: disc; }
 .proj-links { display: flex; gap: var(--sp-1); margin-bottom: var(--sp-2); }
 .proj-link {
   font-size: var(--text-xs);
