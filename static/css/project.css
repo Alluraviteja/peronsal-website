@@ -312,7 +312,7 @@ details.section-expand > .section-expand-body { margin-top: var(--sp-3); }
 
 /* ── PERFORMANCE METRICS ── */
 .perf-metrics {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  display: grid; grid-template-columns: repeat(3, 1fr);
   gap: var(--sp-2); margin: var(--sp-3) 0;
   padding: var(--sp-3); background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius);
