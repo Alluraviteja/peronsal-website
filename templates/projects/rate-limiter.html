@@ -271,26 +271,6 @@ Content-Type: application/json
       </details>
     </section>
 
-    <section class="content-section" id="performance">
-      <p class="section-label">Performance</p>
-      <h2>Measured Under Load</h2>
-      <p>Numbers from local load testing with k6 against a single Docker Compose stack (Spring Boot + Redis on the same machine). Real-world throughput scales with Redis network latency.</p>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number">~15k req/s</div>
-          <div class="stat-label">Single-instance throughput</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">&lt; 5ms</div>
-          <div class="stat-label">Redis check latency (p95)</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">No inconsistencies</div>
-          <div class="stat-label">Observed during concurrent load testing</div>
-        </div>
-      </div>
-    </section>
-
     <div class="cta-section">
       <div>
         <h2>View the Source</h2>
