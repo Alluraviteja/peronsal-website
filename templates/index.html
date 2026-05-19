@@ -149,7 +149,7 @@
       <div class="project-card">
         <h3><span class="proj-icon">🚦</span> API Gateway</h3>
         <ul class="proj-points">
-          <li>Single entry point for multiple backend services</li>
+          <li>Single entry point for multiple services</li>
           <li>Host-based routing</li>
           <li>Rate limit enforcement via external Rate Limiter Service</li>
           <li>Circuit breaking</li>
@@ -171,10 +171,10 @@
       <div class="project-card">
         <h3><span class="proj-icon">⏱️</span> Rate Limiting</h3>
         <ul class="proj-points">
-          <li>Distributed rate limiting service built with Spring Boot and Redis</li>
-          <li>Centralized service — registers apps, assigns plans, enforces token bucket limits via Lua scripts</li>
-          <li>MCP server exposing observability tools for AI agents</li>
-          <li>Configurable fail-open / fail-closed behaviour on Redis failure</li>
+          <li>Atomic token bucket enforcement using Bucket4j Lua scripts, guarantees no race conditions under concurrency</li>
+          <li>Configurable fail-open / fail-closed behavior with circuit breaker support, ensuring service availability during Redis outages</li>
+          <li>Full per-request audit trail, including bot detection, User-Agent parsing, and remaining token counts</li>
+          <li>MCP server enabling AI agents to query live bucket state, audit logs, and overall service health</li>
         </ul>
         <div class="proj-links">
           <a href="/projects/rate-limiter" class="proj-link">
@@ -187,16 +187,13 @@
           </a>
         </div>
         <div class="proj-tags">
+          <span class="proj-tag">Java</span>
           <span class="proj-tag">Spring Boot</span>
-          <span class="proj-tag">Spring AI MCP</span>
-          <span class="proj-tag">Token Bucket</span>
-          <span class="proj-tag">Fail-open / Fail-closed</span>
           <span class="proj-tag">Redis</span>
           <span class="proj-tag">Bucket4j</span>
-          <span class="proj-tag">Lettuce</span>
-          <span class="proj-tag">Lua Script</span>
           <span class="proj-tag">PostgreSQL</span>
           <span class="proj-tag">Resilience4j</span>
+          <span class="proj-tag">Spring AI MCP</span>
           <span class="proj-tag">Docker</span>
         </div>
       </div>
