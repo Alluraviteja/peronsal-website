@@ -274,20 +274,21 @@ Content-Type: application/json
     <section class="content-section" id="load-test">
       <p class="section-label">Load Test</p>
       <h2>Performance Under Load</h2>
-      <p>Five k6 scenarios run in sequence against a remote server (3 vCPU · 3.7 GB RAM · Ubuntu 22.04) — 410k total requests across ~585 seconds. k6 ran locally and sent traffic through an SSH tunnel, so latency numbers include real network round-trip time, not just application processing.</p>
+      <p>Six k6 scenarios run in sequence on the same server (3 vCPU · 3.7 GB RAM · Ubuntu 22.04) — 635,870 total requests across ~585 seconds. k6 ran directly on the server alongside the service, so latency numbers reflect pure application processing time with no network overhead.</p>
       <div class="highlight-card" style="margin-top: var(--sp-3);">
         <ul>
           <li><strong>Throughput</strong> — ramp 50→100 VUs over 3 min; measures max sustainable req/sec before errors appear</li>
           <li><strong>Latency</strong> — 20 VUs steady for 2 min; clean p50/p95/p99 without throughput pressure distorting the numbers</li>
           <li><strong>Cache effectiveness</strong> — 30 VUs, cold requests (first lookup hits the DB) vs warm (plan is cached); measures the in-process cache speedup</li>
           <li><strong>Concurrency accuracy</strong> — 50 VUs fire 100 shared requests at a 50-token bucket simultaneously; verifies no over-count under race conditions</li>
-          <li><strong>Fail-open</strong> — baseline run at 10 VUs, then Redis is stopped mid-test; verifies the service keeps serving requests via the fail-open fallback</li>
+          <li><strong>Fail-open baseline</strong> — 10 VUs for 30s with Redis healthy; establishes a clean latency baseline (p50 5.0 ms)</li>
+          <li><strong>Fail-open degraded</strong> — Redis stopped, same 10 VUs for 60s; verifies the service keeps serving requests via the fail-open fallback (p50 4.0 ms — faster than baseline since the Redis call is skipped entirely)</li>
           <li><strong>Full audit logging remained active</strong> throughout — every request triggers a synchronous <code>@Transactional</code> PostgreSQL INSERT with no async buffering; the latency numbers absorb this cost</li>
         </ul>
       </div>
       <h3 style="font-size: var(--text-base); font-weight: 600; margin-top: var(--sp-4); margin-bottom: var(--sp-2);">Methodology</h3>
       <ul style="font-size: var(--text-sm); color: var(--muted); list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.375rem;">
-        <li style="padding-left: 1.1rem; position: relative;"><span style="position:absolute;left:0;color:var(--accent);font-weight:600;">→</span>k6 ran locally; traffic routed to the remote server over SSH tunnel — latency includes real network round-trip time</li>
+        <li style="padding-left: 1.1rem; position: relative;"><span style="position:absolute;left:0;color:var(--accent);font-weight:600;">→</span>k6 ran on the same server as the service — latency numbers reflect application processing time only, with no network round-trip overhead</li>
         <li style="padding-left: 1.1rem; position: relative;"><span style="position:absolute;left:0;color:var(--accent);font-weight:600;">→</span>Every request issues a synchronous <code>@Transactional</code> PostgreSQL INSERT — no async buffering; the p50/p99 numbers already include this write cost</li>
         <li style="padding-left: 1.1rem; position: relative;"><span style="position:absolute;left:0;color:var(--accent);font-weight:600;">→</span>Latency measurements collected after ~150k warm-up requests to avoid JVM cold-start distortion</li>
         <li style="padding-left: 1.1rem; position: relative;"><span style="position:absolute;left:0;color:var(--accent);font-weight:600;">→</span>Virtual users issued requests continuously with no think time; throughput was constrained only by network RTT and server-side processing</li>
@@ -295,20 +296,24 @@ Content-Type: application/json
       </ul>
       <div class="perf-metrics">
         <div class="perf-metric">
-          <span class="perf-metric-value">701.5</span>
+          <span class="perf-metric-value">1,086.9</span>
           <span class="perf-metric-label">avg req/s · full run</span>
         </div>
         <div class="perf-metric">
-          <span class="perf-metric-value">32.1 ms</span>
+          <span class="perf-metric-value">12.3 ms</span>
           <span class="perf-metric-label">p50 latency</span>
         </div>
         <div class="perf-metric">
-          <span class="perf-metric-value">92.3 ms</span>
+          <span class="perf-metric-value">97.4 ms</span>
           <span class="perf-metric-label">p95 latency</span>
         </div>
         <div class="perf-metric">
-          <span class="perf-metric-value">143.3 ms</span>
+          <span class="perf-metric-value">162.6 ms</span>
           <span class="perf-metric-label">p99 latency</span>
+        </div>
+        <div class="perf-metric">
+          <span class="perf-metric-value">1.5x</span>
+          <span class="perf-metric-label">cache speedup · warm vs cold</span>
         </div>
         <div class="perf-metric">
           <span class="perf-metric-value">0%</span>
@@ -319,7 +324,7 @@ Content-Type: application/json
           <span class="perf-metric-label">availability during Redis outage</span>
         </div>
       </div>
-      <p style="font-size: var(--text-sm); color: var(--muted);">Concurrency validation targeted a single shared bucket: all 100 requests from 50 VUs used the same app identity and client IP, so every request competed for the same 50 tokens. Exactly 50 were allowed and 50 rejected — no overrun, confirming the atomic Lua script held correctness under full contention. Availability during the fail-open scenario reflects the configured fail-open strategy; enforcement was intentionally suspended while Redis was unavailable.</p>
+      <p style="font-size: var(--text-sm); color: var(--muted);">Concurrency validation targeted a single shared bucket: all 100 requests from 50 VUs used the same app identity and client IP, so every request competed for the same 50 tokens. Exactly 50 were allowed and 50 rejected — no overrun, confirming the atomic Lua script held correctness under full contention. Cache speedup (1.5x) measures the difference between cold first-request DB lookups (22.5 ms p50) and subsequent warm cache hits (15.0 ms p50). The fail-open degraded p50 (4.0 ms with Redis down) came in faster than the healthy baseline (5.0 ms) because the service skips the Redis call entirely when the circuit breaker is open — the Redis round-trip itself is the dominant cost on the hot path. Availability during the fail-open scenario reflects the configured fail-open strategy; enforcement was intentionally suspended while Redis was unavailable.</p>
     </section>
 
     <div class="cta-section">
