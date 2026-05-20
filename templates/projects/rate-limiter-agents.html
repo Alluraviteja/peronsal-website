@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rate Limiter Agents | Projects</title>
   <meta name="description" content="A monitoring service built on top of a rate limiter. Three specialist LLM agents analyze errors, token health, and traffic patterns; a fourth orchestrator synthesises their signals into a verdict." />
-  <meta property="og:title" content="Rate Limiter Agents — LLM-Orchestrated Monitoring" />
+  <meta property="og:title" content="Rate Limiter Agents LLM-Orchestrated Monitoring" />
   <meta property="og:description" content="Three specialist agents + an orchestrator that monitors rate-limiter telemetry on a scheduled interval. Stateless specialist agents, two-layer memory, daily regression evals." />
   <meta property="og:type" content="article" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>" />
@@ -32,7 +32,7 @@
 
     <div class="page-hero">
       <h1><span class="page-hero-icon">🤖</span> Rate Limiter Agents</h1>
-      <p>A monitoring layer for rate-limit telemetry that combines deterministic rule evaluation with constrained LLM-based analysis. Three specialist agents analyze errors, token health, and traffic patterns on a scheduled interval; an orchestrator synthesises their signals into a recommended action — monitor, alert, throttle, or block. All outputs are signals only; no automated infrastructure changes are triggered.</p>
+      <p>A monitoring layer for rate-limit telemetry that combines deterministic rule evaluation with constrained LLM-based analysis. Three specialist agents analyze errors, token health, and traffic patterns on a scheduled interval; an orchestrator synthesises their signals into a recommended action monitor, alert, throttle, or block. All outputs are signals only; no automated infrastructure changes are triggered.</p>
       <div class="proj-tags">
         <span class="proj-tag">Python</span>
         <span class="proj-tag">FastAPI</span>
@@ -56,18 +56,18 @@
     <div class="tldr-section">
       <h2>TL;DR</h2>
       <ul>
-        <li><span>3 specialist agents analyze errors, token health, and endpoint traffic independently — each writes its result before the next one starts</span></li>
+        <li><span>3 specialist agents analyze errors, token health, and endpoint traffic independently each writes its result before the next one starts</span></li>
         <li><span>A rule engine applies deterministic severity escalation; the LLM performs contextual interpretation on top</span></li>
-        <li><span>Pipeline runs per app on a configurable interval — every result tagged with <code>app_info_id</code> for full isolation</span></li>
+        <li><span>Pipeline runs per app on a configurable interval every result tagged with <code>app_info_id</code> for full isolation</span></li>
         <li><span>Two-layer memory: 7-day rolling baseline + last 3 run results injected into the orchestrator prompt</span></li>
         <li><span>5-scenario daily regression suite catches prompt drift before it reaches production</span></li>
-        <li><span>Strategy + Factory pattern for LLM backends — swap providers by changing one environment variable</span></li>
+        <li><span>Strategy + Factory pattern for LLM backends swap providers by changing one environment variable</span></li>
       </ul>
     </div>
 
     <!-- ── MOTIVATION ── -->
     <div class="motivation-section">
-      <p>Most rate limiters expose raw telemetry but little contextual interpretation. I built this project to explore whether specialist LLM agents could act as a lightweight contextual analysis layer on top of deterministic infrastructure — and to test where that boundary between rules and interpretation should sit. I intentionally split responsibilities into specialist agents to keep prompts narrow, reduce cross-signal ambiguity, and make failures easier to isolate during evaluation.</p>
+      <p>Most rate limiters expose raw telemetry but little contextual interpretation. I built this project to explore whether specialist LLM agents could act as a lightweight contextual analysis layer on top of deterministic infrastructure and to test where that boundary between rules and interpretation should sit. I intentionally split responsibilities into specialist agents to keep prompts narrow, reduce cross-signal ambiguity, and make failures easier to isolate during evaluation.</p>
     </div>
 
     <!-- ── ARCHITECTURE ── -->
@@ -80,12 +80,12 @@
         class="arch-img"
         loading="lazy"
       />
-      <p>The orchestrator receives all three specialist results as in-memory Python objects — it never re-queries the agent database for the current run's data. This avoids redundant reads and eliminates consistency issues between agent writes and orchestrator reads within the same pipeline execution.</p>
+      <p>The orchestrator receives all three specialist results as in-memory Python objects it never re-queries the agent database for the current run's data. This avoids redundant reads and eliminates consistency issues between agent writes and orchestrator reads within the same pipeline execution.</p>
       <details class="section-expand">
         <summary>Data layer &amp; startup details</summary>
         <div class="section-expand-body">
-          <p>Two separate databases with distinct roles. The rate limiter database is the read model — raw telemetry, never written to, no migrations run against it. The agent database is the write model — results, baseline memory, eval outcomes. Alembic migrations run on startup and apply only to the write side.</p>
-          <p>On startup the application runs Alembic migrations to head before starting the APScheduler background scheduler. If migrations fail, startup aborts — no half-initialised scheduler running against a stale schema. Both SQLAlchemy engines carry <code>pool_pre_ping=True</code>, which validates connection liveness before every query and reconnects transparently if the database restarted.</p>
+          <p>Two separate databases with distinct roles. The rate limiter database is the read model raw telemetry, never written to, no migrations run against it. The agent database is the write model results, baseline memory, eval outcomes. Alembic migrations run on startup and apply only to the write side.</p>
+          <p>On startup the application runs Alembic migrations to head before starting the APScheduler background scheduler. If migrations fail, startup aborts no half-initialised scheduler running against a stale schema. Both SQLAlchemy engines carry <code>pool_pre_ping=True</code>, which validates connection liveness before every query and reconnects transparently if the database restarted.</p>
           <p>Each pipeline run follows a fixed lifecycle: fetch all enabled apps → for each app, run agents ①②③ sequentially → run orchestrator ④ → log the final verdict. Each specialist agent writes its own result before the next starts.</p>
         </div>
       </details>
@@ -95,7 +95,7 @@
     <section class="content-section" id="overview">
       <p class="section-label">Overview</p>
       <h2>What It Does</h2>
-      <p>APScheduler triggers a pipeline run on a configurable interval (default 15 minutes). Each run fetches all enabled apps and executes the four-agent pipeline once per app — every result tagged with <code>app_info_id</code> for full tenant isolation. Up to 5,000 log rows per agent per run keeps query cost predictable regardless of traffic volume. 4 LLM calls per app, every result persisted with severity, action, reason, token usage, and USD cost.</p>
+      <p>APScheduler triggers a pipeline run on a configurable interval (default 15 minutes). Each run fetches all enabled apps and executes the four-agent pipeline once per app every result tagged with <code>app_info_id</code> for full tenant isolation. Up to 5,000 log rows per agent per run keeps query cost predictable regardless of traffic volume. 4 LLM calls per app, every result persisted with severity, action, reason, token usage, and USD cost.</p>
       <p>Each app carries a <code>per_ip_address</code> flag that changes how every agent interprets the same numbers. A 90% block rate on a per-IP app where one client is the culprit is normal operation; the same number on a shared-bucket app affects every caller. See <em>Behavioral Flag Pattern</em> below for how this is enforced across all agents.</p>
     </section>
 
@@ -113,7 +113,7 @@
           <p>Block rate, error rate, and response code distribution over the last 15 minutes. Surfaces per-path error concentrations and top block reasons.</p>
           <ul>
             <li>Anomaly when error_rate &gt; 20%, block_rate &gt; 30%, or any 5xx response</li>
-            <li>Per-IP: blocks concentrated on one IP drops severity one level — the limiter is working as intended</li>
+            <li>Per-IP: blocks concentrated on one IP drops severity one level the limiter is working as intended</li>
           </ul>
           <details class="thresholds">
             <summary>Severity thresholds</summary>
@@ -185,7 +185,7 @@
           <p>Two-phase synthesis: a deterministic rule engine sets the severity floor, then a context-augmented LLM confirms or adjusts using baseline and recent history.</p>
 
           <div class="phase-block">
-            <h4>Phase 1 — Deterministic Escalation</h4>
+            <h4>Phase 1 Deterministic Escalation</h4>
             <ul>
               <li>Any agent at critical → final severity is critical</li>
               <li>2+ agents at high → critical · 1 agent at high → high</li>
@@ -194,7 +194,7 @@
           </div>
 
           <div class="phase-block">
-            <h4>Phase 2 — Contextual Validation</h4>
+            <h4>Phase 2 Contextual Validation</h4>
             <ul>
               <li>7-day rolling baseline + last 3 orchestrator results injected into prompt</li>
               <li>Escalating trend → upgrade one level · stable or recovering → downgrade</li>
@@ -247,13 +247,13 @@
       <div class="incident-verdict" role="note" aria-label="Orchestrator decision">
         <h4>Orchestrator Decision</h4>
         <p><strong>Phase 1 (rule engine):</strong> 1 critical agent → deterministic floor is critical. Mapped action: block (signal only).</p>
-        <p><strong>Phase 2 (LLM context):</strong> 3-run trend shows escalating severity. Baseline block rate for this app is 12% — current 82% is a 6.8× spike. LLM confirms: no downgrade warranted.</p>
+        <p><strong>Phase 2 (LLM context):</strong> 3-run trend shows escalating severity. Baseline block rate for this app is 12% current 82% is a 6.8× spike. LLM confirms: no downgrade warranted.</p>
       </div>
 
       <details class="section-expand">
         <summary>Raw LLM output &amp; parse</summary>
         <div class="section-expand-body">
-          <p>The LLM prompt specifies an exact labeled format and forbids free-form text. The response is parsed line-by-line — no unstructured text reaches the database.</p>
+          <p>The LLM prompt specifies an exact labeled format and forbids free-form text. The response is parsed line-by-line no unstructured text reaches the database.</p>
           <div class="llm-output-grid">
             <div>
               <p class="llm-output-label">Raw LLM response (orchestrator)</p>
@@ -306,7 +306,7 @@ ACTION: throttle</code></pre>
         <div class="highlight-card highlight-card--core">
           <span class="core-badge">★ Core</span>
           <h3>Constrained Generation + Null Object Fallback</h3>
-          <p>Agents use constrained generation — the LLM prompt specifies an exact labeled format and forbids free-form text. The response is parsed line by line into key-value pairs.</p>
+          <p>Agents use constrained generation the LLM prompt specifies an exact labeled format and forbids free-form text. The response is parsed line by line into key-value pairs.</p>
           <ul>
             <li>Missing or unparseable field → safe default via <code>.get("KEY", default)</code></li>
             <li>Full agent exception → Null Object: severity none, action monitor, cost $0</li>
@@ -317,11 +317,11 @@ ACTION: throttle</code></pre>
         <div class="highlight-card highlight-card--core">
           <span class="core-badge">★ Core</span>
           <h3>Two-Layer Agent Memory</h3>
-          <p>Long-term memory is a sliding window aggregate — a running mean of RPS, block rate, and bot ratio per app, capped at 672 samples (~7 days at 15-min intervals).</p>
+          <p>Long-term memory is a sliding window aggregate a running mean of RPS, block rate, and bot ratio per app, capped at 672 samples (~7 days at 15-min intervals).</p>
           <ul>
             <li>Spike threshold derived dynamically: 2.5× if baseline block &lt; 5%, 3× normal, 4× if &gt; 20%</li>
             <li>Short-term: last 3 orchestrator results serialised into the prompt as recent history</li>
-            <li>Baseline is O(1) per app — a single row stores a running mean capped at 672 samples; it never grows. Historical incident rows (AgentResult, OrchestratorResult) accumulate separately as an unbounded audit trail</li>
+            <li>Baseline is O(1) per app a single row stores a running mean capped at 672 samples; it never grows. Historical incident rows (AgentResult, OrchestratorResult) accumulate separately as an unbounded audit trail</li>
           </ul>
         </div>
 
@@ -330,7 +330,7 @@ ACTION: throttle</code></pre>
           <h3>Behavioral Flag Pattern</h3>
           <p>The <code>per_ip_address</code> flag is read at the start of each pipeline run and passed explicitly into every agent call and LLM prompt. Same raw metrics, completely different meaning depending on mode.</p>
           <ul>
-            <li>Flag is stated explicitly in every prompt — the LLM is never asked to infer context</li>
+            <li>Flag is stated explicitly in every prompt the LLM is never asked to infer context</li>
             <li>Per-IP severity downgrade logic is encoded directly in each agent's system prompt</li>
           </ul>
         </div>
@@ -344,27 +344,27 @@ ACTION: throttle</code></pre>
 
             <div class="highlight-card">
               <h3>Strategy + Factory for LLM Backends</h3>
-              <p>A shared abstract base class defines the contract — <code>complete()</code> returns a normalised <code>LLMResponse</code> with content, token counts, and USD cost.</p>
+              <p>A shared abstract base class defines the contract <code>complete()</code> returns a normalised <code>LLMResponse</code> with content, token counts, and USD cost.</p>
               <ul>
-                <li>Factory reads <code>LLM_PROVIDER</code> env var at startup — no conditionals in agent code</li>
+                <li>Factory reads <code>LLM_PROVIDER</code> env var at startup no conditionals in agent code</li>
                 <li>Adding a new provider means one new class; nothing else changes</li>
-                <li>Retry with exponential backoff lives in the base class — 3 attempts, 2 s base delay with jitter</li>
+                <li>Retry with exponential backoff lives in the base class 3 attempts, 2 s base delay with jitter</li>
               </ul>
             </div>
 
             <div class="highlight-card">
               <h3>Scenario-Based Regression Testing</h3>
-              <p>Each eval scenario uses a test double — a fresh in-memory SQLite database seeded with synthetic logs for a known traffic condition.</p>
+              <p>Each eval scenario uses a test double a fresh in-memory SQLite database seeded with synthetic logs for a known traffic condition.</p>
               <ul>
                 <li>5 scenarios × 4 agents = 20 severity and action accuracy checks per daily eval run</li>
-                <li>System prompts are versioned with the codebase — git history links any accuracy drop to the exact prompt change that caused it</li>
+                <li>System prompts are versioned with the codebase git history links any accuracy drop to the exact prompt change that caused it</li>
                 <li>Results stored as a continuous accuracy trend queryable at <code>/evals</code>; degradation is visible before it affects production</li>
               </ul>
             </div>
 
             <div class="highlight-card">
               <h3>Cost Attribution</h3>
-              <p>USD cost is calculated at write time and stored per agent result — not as a single pipeline total.</p>
+              <p>USD cost is calculated at write time and stored per agent result not as a single pipeline total.</p>
               <ul>
                 <li>Attributed per agent name, per app, and per day</li>
                 <li>Dashboard exposes a 7-day cost series broken down by agent</li>
@@ -377,7 +377,7 @@ ACTION: throttle</code></pre>
               <p>Every image is tagged with the exact commit SHA. CI gates every push; CD only runs after CI passes.</p>
               <ul>
                 <li>CI: TruffleHog secrets scan, mypy, ruff, pytest, Trivy filesystem + image scan</li>
-                <li>CD polls <code>/health</code> (liveness) every 5 s for 90 s via Docker HEALTHCHECK — on failure, restarts previous SHA-tagged image</li>
+                <li>CD polls <code>/health</code> (liveness) every 5 s for 90 s via Docker HEALTHCHECK on failure, restarts previous SHA-tagged image</li>
                 <li>Multi-stage Docker: compiler toolchain only in build stage; tini as PID 1, non-root user</li>
               </ul>
             </div>
@@ -406,44 +406,44 @@ ACTION: throttle</code></pre>
           <tbody>
             <tr>
               <td>Hard thresholds &amp; severity escalation</td>
-              <td>Excellent — fast, deterministic</td>
+              <td>Excellent fast, deterministic</td>
               <td>Unnecessary overhead</td>
             </tr>
             <tr>
               <td>Trend interpretation (escalating / recovering)</td>
               <td>Complex stateful logic</td>
-              <td>Natural — reads serialised history</td>
+              <td>Natural reads serialised history</td>
             </tr>
             <tr>
               <td>Human-readable incident summaries</td>
-              <td>Difficult — static templates only</td>
-              <td>Excellent — contextual prose</td>
+              <td>Difficult static templates only</td>
+              <td>Excellent contextual prose</td>
             </tr>
             <tr>
               <td>Cross-signal reasoning (mode × severity × signal)</td>
               <td>Rule explosion risk</td>
-              <td>Flexible — handles combinations naturally</td>
+              <td>Flexible handles combinations naturally</td>
             </tr>
             <tr>
               <td>Deterministic guarantees</td>
               <td>Excellent</td>
-              <td>Weak — non-deterministic at margins</td>
+              <td>Weak non-deterministic at margins</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <ul class="detail-list">
-        <li><strong>Cross-signal interpretation and context-dependent thresholds</strong> — block rate, error rate, 5xx presence, and per-IP mode interact combinatorially. A single LLM prompt that understands mode is simpler than a rule tree that branches on mode × severity × signal combination.</li>
-        <li><strong>Trend analysis</strong> — the orchestrator compares recent structured verdict history against the rolling baseline to detect escalation or recovery patterns.</li>
-        <li><strong>Incident summarisation</strong> — every verdict includes a human-readable <code>reason</code> field that explains the decision in context. This cannot come from a rule engine.</li>
+        <li><strong>Cross-signal interpretation and context-dependent thresholds</strong> block rate, error rate, 5xx presence, and per-IP mode interact combinatorially. A single LLM prompt that understands mode is simpler than a rule tree that branches on mode × severity × signal combination.</li>
+        <li><strong>Trend analysis</strong> the orchestrator compares recent structured verdict history against the rolling baseline to detect escalation or recovery patterns.</li>
+        <li><strong>Incident summarisation</strong> every verdict includes a human-readable <code>reason</code> field that explains the decision in context. This cannot come from a rule engine.</li>
       </ul>
       <p>The boundary is equally important. LLMs are never permitted to:</p>
       <ul class="detail-list">
-        <li><strong>Trigger infrastructure actions</strong> — the block/throttle/alert verdict is a signal only; no automated changes to rate limits or traffic policies are ever triggered by LLM output</li>
-        <li><strong>Bypass deterministic escalation</strong> — the rule engine runs before every LLM call; LLM output cannot override the severity floor</li>
-        <li><strong>Write free-form state</strong> — LLM output is parsed into structured fields (<code>SEVERITY</code>, <code>ACTION</code>, <code>REASON</code>); no unstructured text reaches the database</li>
-        <li><strong>Mutate telemetry</strong> — the rate limiter DB is strictly read-only for this service</li>
+        <li><strong>Trigger infrastructure actions</strong> the block/throttle/alert verdict is a signal only; no automated changes to rate limits or traffic policies are ever triggered by LLM output</li>
+        <li><strong>Bypass deterministic escalation</strong> the rule engine runs before every LLM call; LLM output cannot override the severity floor</li>
+        <li><strong>Write free-form state</strong> LLM output is parsed into structured fields (<code>SEVERITY</code>, <code>ACTION</code>, <code>REASON</code>); no unstructured text reaches the database</li>
+        <li><strong>Mutate telemetry</strong> the rate limiter DB is strictly read-only for this service</li>
       </ul>
     </section>
 
@@ -477,10 +477,10 @@ ACTION: throttle</code></pre>
       </div>
 
       <ul class="detail-list">
-        <li><strong>Sequential agents &amp; synchronous I/O</strong> — sequential execution was the intentional choice for the initial design: deterministic ordering simplified observability, replay analysis, and failure isolation during prompt iteration. LLM calls are currently synchronous (blocking retry with thread-sleep), DB queries use standard SQLAlchemy sessions, and APScheduler dispatches pipeline jobs on a thread-pool executor. This makes each run fully traceable but means latency scales as <em>O(apps × 4 calls × LLM latency)</em>. At larger scale, the pipeline would shift to per-app async concurrency via <code>asyncio.gather</code> with a bounded semaphore controlling LLM fanout — parallelising across apps while keeping within-app sequential order and avoiding provider rate-limit bursts.</li>
-        <li><strong>3 independent DB queries per window</strong> — each specialist agent re-queries the same log window separately. Simpler isolation, but 3× duplicate reads versus a shared fetch model.</li>
-        <li><strong>In-process scheduler</strong> — APScheduler runs in the same process as FastAPI. A scheduler hang affects the API and vice versa. A separate worker process would isolate these concerns.</li>
-        <li><strong>LLM non-determinism</strong> — identical inputs can produce slightly different severity outputs across runs. The deterministic rule engine sets a hard floor, but exact reproducibility is impossible at the margins.</li>
+        <li><strong>Sequential agents &amp; synchronous I/O</strong> sequential execution was the intentional choice for the initial design: deterministic ordering simplified observability, replay analysis, and failure isolation during prompt iteration. LLM calls are currently synchronous (blocking retry with thread-sleep), DB queries use standard SQLAlchemy sessions, and APScheduler dispatches pipeline jobs on a thread-pool executor. This makes each run fully traceable but means latency scales as <em>O(apps × 4 calls × LLM latency)</em>. At larger scale, the pipeline would shift to per-app async concurrency via <code>asyncio.gather</code> with a bounded semaphore controlling LLM fanout parallelising across apps while keeping within-app sequential order and avoiding provider rate-limit bursts.</li>
+        <li><strong>3 independent DB queries per window</strong> each specialist agent re-queries the same log window separately. Simpler isolation, but 3× duplicate reads versus a shared fetch model.</li>
+        <li><strong>In-process scheduler</strong> APScheduler runs in the same process as FastAPI. A scheduler hang affects the API and vice versa. A separate worker process would isolate these concerns.</li>
+        <li><strong>LLM non-determinism</strong> identical inputs can produce slightly different severity outputs across runs. The deterministic rule engine sets a hard floor, but exact reproducibility is impossible at the margins.</li>
       </ul>
 
       <div class="table-wrapper">
@@ -495,11 +495,11 @@ ACTION: throttle</code></pre>
           <tbody>
             <tr>
               <td>Malformed LLM output</td>
-              <td>Constrained generation + Null Object fallback — missing fields default to none/monitor, never raise an exception</td>
+              <td>Constrained generation + Null Object fallback missing fields default to none/monitor, never raise an exception</td>
             </tr>
             <tr>
               <td>Provider timeout or rate limit</td>
-              <td>Exponential backoff retry — 3 attempts, 2 s base delay with jitter, then safe default result</td>
+              <td>Exponential backoff retry 3 attempts, 2 s base delay with jitter, then safe default result</td>
             </tr>
             <tr>
               <td>Database unavailable</td>
@@ -507,7 +507,7 @@ ACTION: throttle</code></pre>
             </tr>
             <tr>
               <td>Prompt or model regression</td>
-              <td>Daily eval suite re-tests 5 labelled scenarios and stores an accuracy trend — drift visible before it affects production</td>
+              <td>Daily eval suite re-tests 5 labelled scenarios and stores an accuracy trend drift visible before it affects production</td>
             </tr>
             <tr>
               <td>Agent stall / hung provider call</td>
@@ -536,17 +536,17 @@ ACTION: throttle</code></pre>
               <h3>Structured JSON Logs</h3>
               <p>A custom formatter wraps every log entry: timestamp, level, logger, message, and optionally a request_id.</p>
               <ul>
-                <li><code>X-Request-ID</code> echoed on every HTTP response — correlate a request across log lines by a single ID</li>
+                <li><code>X-Request-ID</code> echoed on every HTTP response correlate a request across log lines by a single ID</li>
                 <li>Per-app pipeline completion: <code>app_info_id</code>, severity, action on every run</li>
-                <li>Per-app pipeline failures logged individually — one app crashing does not suppress other apps' logs</li>
+                <li>Per-app pipeline failures logged individually one app crashing does not suppress other apps' logs</li>
               </ul>
             </div>
             <div class="highlight-card">
               <h3>Health Endpoints</h3>
               <p>Two tiers of health signal, aligned with standard container orchestration patterns.</p>
               <ul>
-                <li><code>/health</code> — liveness: returns <code>{"status": "ok"}</code> if the process is up</li>
-                <li><code>/health/ready</code> — readiness: runs <code>SELECT 1</code> against both DBs; returns 503 if either is unreachable</li>
+                <li><code>/health</code> liveness: returns <code>{"status": "ok"}</code> if the process is up</li>
+                <li><code>/health/ready</code> readiness: runs <code>SELECT 1</code> against both DBs; returns 503 if either is unreachable</li>
                 <li>503 on readiness stops traffic routing and triggers automatic rollback to the previous image</li>
               </ul>
             </div>
@@ -554,9 +554,9 @@ ACTION: throttle</code></pre>
               <h3>Dashboard API</h3>
               <p>Three REST endpoints expose runtime state without a separate observability stack.</p>
               <ul>
-                <li><code>/dashboard</code> — 7-day LLM cost series broken down by agent name and day</li>
-                <li><code>/agents</code> — recent agent results per app: severity, action, reason, token usage</li>
-                <li><code>/evals</code> — daily accuracy trend: severity_accuracy_pct and action_accuracy_pct per run</li>
+                <li><code>/dashboard</code> 7-day LLM cost series broken down by agent name and day</li>
+                <li><code>/agents</code> recent agent results per app: severity, action, reason, token usage</li>
+                <li><code>/evals</code> daily accuracy trend: severity_accuracy_pct and action_accuracy_pct per run</li>
               </ul>
             </div>
           </div>
@@ -566,7 +566,7 @@ ACTION: throttle</code></pre>
       <details class="section-expand">
         <summary>Sequence Diagram</summary>
         <div class="section-expand-body">
-          <p>One complete pipeline run for a single app — showing the order of DB reads, LLM calls, and writes. The outer group repeats for every enabled app in sequence.</p>
+          <p>One complete pipeline run for a single app showing the order of DB reads, LLM calls, and writes. The outer group repeats for every enabled app in sequence.</p>
           <img
             src="/static/img/rate-limiter-agents-seq.svg"
             alt="Sequence diagram: APScheduler triggers Agent Pipeline every 15 minutes. Pipeline queries Rate Limiter DB for enabled apps. For each app: agents ①②③ each query logs (LIMIT 5000), call LLM, and write AgentResult. Orchestrator reads baseline and last 3 results from Agent DB, calls LLM with all signals, then writes OrchestratorResult and updates baseline."
