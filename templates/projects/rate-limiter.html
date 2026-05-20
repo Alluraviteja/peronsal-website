@@ -32,10 +32,10 @@
       <p>Most API gateways support rate limiting, but those limits are often tied to a single gateway instance or vendor platform. This service centralizes enforcement so multiple gateways and services can share the same policies.</p>
       <div class="proj-tags">
         <span class="proj-tag">Spring Boot</span>
-        <span class="proj-tag">Token Bucket</span>
         <span class="proj-tag">Spring AI MCP</span>
-        <span class="proj-tag">Fail-open / Fail-closed</span>
         <span class="proj-tag">Redis</span>
+        <span class="proj-tag">Token Bucket</span>
+        <span class="proj-tag">Fail-open / Fail-closed</span>
         <span class="proj-tag">Bucket4j</span>
         <span class="proj-tag">Lettuce</span>
         <span class="proj-tag">Lua Script</span>
@@ -123,7 +123,7 @@
             <li><strong>Retry:</strong> two attempts, 50ms apart, only on Redis exceptions.</li>
             <li><strong>Circuit breaker:</strong> trips when 50% of calls fail over a 20-request window.</li>
             <li>Once open, waits 10 seconds before testing again.</li>
-            <li>Goal: stop hammering a Redis instance that's down and recover automatically when it comes back.</li>
+            <li><strong></strong>Goal:</strong> stop hammering a Redis instance that's down and recover automatically when it comes back.</li>
           </ul>
         </div>
         <div class="highlight-card">
@@ -340,6 +340,35 @@ Content-Type: application/json
         The concurrency test confirms correct enforcement under full contention for the tested 50-token bucket using
         atomic Lua scripting.
       </p>
+    </section>
+
+    <section class="content-section" id="try-it">
+      <p class="section-label">Live Demo</p>
+      <h2>Try It on This Page</h2>
+      <p>This page is rate limited. Refresh more than twice within 5 seconds and the gateway returns a <strong>429 Too Many Requests</strong> instead of this page. Wait 5 seconds and it loads normally again.</p>
+
+      <div class="highlight-card" style="margin-top: var(--sp-3);">
+        <h3>Active Plan — <code>/projects/rate-limiter</code></h3>
+        <table class="failure-table">
+          <thead>
+            <tr>
+              <th>capacity</th>
+              <th>refill rate</th>
+              <th>refill period seconds</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2 tokens</td>
+              <td>2 tokens</td>
+              <td>5 s</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top: var(--sp-2); font-size: var(--text-sm); color: var(--muted);">
+          Each visit spends 1 token. After 2 requests the bucket is empty; the 3rd returns 429. Tokens refill continuously after 5 s the bucket is full again.
+        </p>
+      </div>
     </section>
 
     <div class="cta-section">
