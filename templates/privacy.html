@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy | bitenabled.com</title>
+  <meta name="description" content="Privacy policy for bitenabled.com – what data is collected, why, and how long it is retained." />
+  <meta name="robots" content="index, follow" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <link rel="canonical" href="https://bitenabled.com/privacy" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>" />
+  <link rel="stylesheet" href="/static/css/inter.css" />
+  <link rel="stylesheet" href="/static/css/style.css?v={{.Version}}" />
+  <link rel="stylesheet" href="/static/css/project.css?v={{.Version}}" />
+</head>
+<body>
+
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <nav aria-label="Primary navigation">
+    <a href="/" class="nav-back">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg>
+      Back
+    </a>
+    <a href="/" class="nav-brand">Home</a>
+    <div class="nav-spacer"></div>
+  </nav>
+
+  <main id="main">
+
+    <div class="page-hero">
+      <h1>Privacy Policy</h1>
+      <p>Last updated: {{.LastUpdated}}</p>
+      <p>This policy applies to <strong>bitenabled.com and all subdomains operated by the same owner</strong> (e.g., api.bitenabled.com). It explains what data is collected, why it is collected, and how long it is retained. This site is a personal portfolio. It does not use advertising, sell data, or track users across other websites.</p>
+    </div>
+
+    <section class="content-section">
+      <h2>What Data Is Collected</h2>
+      <p>When you visit this site, standard request metadata may be logged for security, abuse prevention, and rate limiting purposes. This may include information such as your IP address, request details, browser and device information, referrer URL, bot-detection signals, and request timestamps.</p>
+      <p>No names, email addresses, or account information are collected. This site does not intentionally use cookies for analytics, advertising, or user tracking. This site does not intentionally use third-party advertising or behavioral tracking scripts.</p>
+      <p>Referrer URLs are logged as transmitted by the browser and may occasionally contain query parameters from third-party sites.</p>
+    </section>
+
+    <section class="content-section">
+      <h2>Why It Is Collected</h2>
+      <p>This data is collected solely for the following operational purposes:</p>
+      <ul>
+        <li><strong>Rate limiting:</strong> To prevent abuse and ensure fair access to the service by enforcing per-IP and per-client request limits.</li>
+        <li><strong>Security:</strong> To detect and block malicious traffic, bots, and denial-of-service attempts.</li>
+        <li><strong>Audit logging:</strong> To investigate anomalies and tune rate limit policies after the fact.</li>
+      </ul>
+      <p>The lawful basis for this processing is <strong>Legitimate Interest</strong> under GDPR Article 6(1)(f). Protecting the availability and integrity of the service is a legitimate interest that outweighs the minimal privacy impact of logging standard request metadata.</p>
+    </section>
+
+    <section class="content-section">
+      <h2>How Long Data Is Retained</h2>
+      <p>Request logs are retained for a maximum of <strong>1 year</strong>, after which they are automatically deleted. No backups of this data are kept beyond that period.</p>
+      <p>A one-year retention period is maintained because this site operates publicly exposed APIs and rate limiting infrastructure. Longer retention supports investigation of repeated abuse patterns, multi-month traffic anomalies, and tuning of rate-limit policies over time.</p>
+    </section>
+
+    <section class="content-section">
+      <h2>Data Sharing and International Transfers</h2>
+      <p>This data is not sold or used for advertising purposes. However, as part of normal infrastructure operations, data may be processed by third-party infrastructure providers for hosting, networking, DDoS protection, and security purposes. These providers primarily act as data processors or service providers and are contractually bound to process data only for those purposes.</p>
+      <p>Data may be processed in countries outside your jurisdiction depending on the hosting infrastructure used. Infrastructure providers are selected based in part on their use of Standard Contractual Clauses (SCCs) or equivalent safeguards for international data transfers.</p>
+    </section>
+
+    <section class="content-section">
+      <h2>Your Rights</h2>
+      <p>If you are located in the European Economic Area, you have rights under the General Data Protection Regulation (GDPR), including the right to access your data, request deletion, and object to processing based on legitimate interest.</p>
+      <p><strong>Practical limitations:</strong> Request logs are stored by IP address only. There are no user accounts or names linked to this data. If you submit a deletion request, you must include the IP address you were using. Because IP addresses are dynamic and shared, we cannot guarantee that all records belong exclusively to you, and deletion is performed on a best-effort basis.</p>
+      <p>This processing is necessary to protect the service from abuse and maintain availability, and the site cannot reasonably operate without this limited logging.</p>
+      <p>You may also lodge a complaint with your local data protection authority if you believe your data is being processed unlawfully.</p>
+      <p>For more information about GDPR rights, see the official overview at <a href="https://gdpr.eu/" target="_blank" rel="noopener noreferrer external">gdpr.eu</a>.</p>
+      <p>To exercise any rights, contact: <a href="mailto:privacy@bitenabled.com">privacy@bitenabled.com</a></p>
+    </section>
+
+    <section class="content-section">
+      <h2>Changes to This Policy</h2>
+      <p>If this policy changes materially, the "Last updated" date at the top of this page will be revised. Because this site processes data under Legitimate Interest rather than consent, your continued use of the site is not treated as legal acceptance — the updated policy simply reflects current practice.</p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Designed &amp; Built by {{.Name}} &nbsp;&middot;&nbsp; <span id="year"></span> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy Policy</a></p>
+  </footer>
+
+  <script src="/static/js/main.js" defer></script>
+
+</body>
+</html>
