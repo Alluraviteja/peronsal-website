@@ -12,10 +12,11 @@ import (
 )
 
 type PageData struct {
-	Name    string
-	Title   string
-	Tagline string
-	Version string
+	Name        string
+	Title       string
+	Tagline     string
+	Version     string
+	LastUpdated string
 }
 
 var tmpl *template.Template
@@ -32,10 +33,11 @@ func init() {
 }
 
 var defaultData = PageData{
-	Name:    "Raviteja",
-	Title:   "Software Engineer",
-	Tagline: "Building reliable systems and clean interfaces.",
-	Version: fmt.Sprintf("%d", time.Now().UnixMilli()),
+	Name:        "Raviteja",
+	Title:       "Software Engineer",
+	Tagline:     "Building reliable systems and clean interfaces.",
+	Version:     fmt.Sprintf("%d", time.Now().UnixMilli()),
+	LastUpdated: time.Now().Format("January 2, 2006"),
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +65,13 @@ func rateLimiterAgentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func privacyHandler(w http.ResponseWriter, _ *http.Request) {
+	if err := tmpl.ExecuteTemplate(w, "privacy.html", defaultData); err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		log.Printf("template error: %v", err)
+	}
+}
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -71,8 +80,15 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	mux.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/robots.txt")
+	})
+	mux.HandleFunc("/sitemap.xml", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/sitemap.xml")
+	})
 	mux.HandleFunc("/projects/rate-limiter-agents", rateLimiterAgentsHandler)
 	mux.HandleFunc("/projects/rate-limiter", rateLimiterHandler)
+	mux.HandleFunc("/privacy", privacyHandler)
 	mux.HandleFunc("/", indexHandler)
 
 	log.Printf("listening on http://localhost:%s", port)
