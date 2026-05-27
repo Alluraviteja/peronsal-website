@@ -7,6 +7,12 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://bitenabled.com/privacy</loc>
+    <lastmod>2026-05-27</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://bitenabled.com/projects/rate-limiter</loc>
     <lastmod>2026-05-27</lastmod>
     <changefreq>monthly</changefreq>
