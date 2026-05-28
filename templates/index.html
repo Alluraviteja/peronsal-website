@@ -157,6 +157,69 @@
     <div class="projects-grid">
 
       <div class="project-card">
+        <h3><span class="proj-icon">⏱️</span> Rate Limiting</h3>
+        <ul class="proj-points">
+          <li>Atomic token bucket enforcement using Bucket4j Lua scripts, guarantees no race conditions under concurrency</li>
+          <li>Configurable fail-open / fail-closed behavior with circuit breaker support, ensuring service availability during Redis outages</li>
+          <li>Full per-request audit trail, including bot detection, User-Agent parsing, and remaining token counts</li>
+          <li>MCP server enabling AI agents to query live bucket state, audit logs, and overall service health</li>
+        </ul>
+        <div class="proj-links">
+          <a href="/projects/rate-limiter" class="proj-link">
+            <svg height="13" width="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            View Details
+          </a>
+          <a href="https://github.com/Alluraviteja/rate-limiting-service" target="_blank" rel="noopener noreferrer" class="proj-link">
+            <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+          </a>
+        </div>
+        <div class="proj-tags">
+          <span class="proj-tag">Java</span>
+          <span class="proj-tag">Spring Boot</span>
+          <span class="proj-tag">Spring AI MCP</span>
+          <span class="proj-tag">Redis</span>
+          <span class="proj-tag">Bucket4j</span>
+          <span class="proj-tag">Resilience4j</span>
+          <span class="proj-tag">PostgreSQL</span>
+          <span class="proj-tag">Docker</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <h3><span class="proj-icon">🤖</span> Rate Limiter Agents - Multi-Agent Monitoring</h3>
+        <ul class="proj-points">
+          <li>3 specialist agents each cover one signal: error bursts, token health, or traffic spikes, each returns a severity (none to critical)</li>
+          <li>Orchestrator reads all three and outputs a single action: monitor, alert, throttle, or block</li>
+          <li>Baseline adapts by time of day and day of week so off-hours spikes don't false-alarm</li>
+          <li>Daily evals run against fixed scenarios to catch when agent decisions regress</li>
+        </ul>
+        <div class="proj-links">
+          <a href="/projects/rate-limiter-agents" class="proj-link">
+            <svg height="13" width="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            View Details
+          </a>
+          <a href="https://github.com/Alluraviteja/rate-limit-agent" target="_blank" rel="noopener noreferrer" class="proj-link">
+            <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+          </a>
+          <a href="https://rl-agents.bitenabled.com" target="_blank" rel="noopener noreferrer" class="proj-link">
+            <svg height="13" width="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Live Demo
+          </a>
+        </div>
+        <div class="proj-tags">
+          <span class="proj-tag">Generative AI</span>
+          <span class="proj-tag">AI Agents</span>
+          <span class="proj-tag">Anomaly Detection</span>
+          <span class="proj-tag">Python</span>
+          <span class="proj-tag">FastAPI</span>
+          <span class="proj-tag">PostgreSQL</span>
+          <span class="proj-tag">Docker</span>
+        </div>
+      </div>
+
+      <div class="project-card">
         <h3><span class="proj-icon">🚦</span> API Gateway</h3>
         <ul class="proj-points">
           <li>Single entry point for multiple services</li>
@@ -179,70 +242,10 @@
       </div>
 
       <div class="project-card">
-        <h3><span class="proj-icon">⏱️</span> Rate Limiting</h3>
-        <ul class="proj-points">
-          <li>Atomic token bucket enforcement using Bucket4j Lua scripts, guarantees no race conditions under concurrency</li>
-          <li>Configurable fail-open / fail-closed behavior with circuit breaker support, ensuring service availability during Redis outages</li>
-          <li>Full per-request audit trail, including bot detection, User-Agent parsing, and remaining token counts</li>
-          <li>MCP server enabling AI agents to query live bucket state, audit logs, and overall service health</li>
-        </ul>
-        <div class="proj-links">
-          <a href="/projects/rate-limiter" class="proj-link">
-            <svg height="13" width="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-            View Details
-          </a>
-          <a href="https://github.com/Alluraviteja/rate-limiting-service" target="_blank" rel="noopener noreferrer" class="proj-link">
-            <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-            GitHub
-          </a>
-        </div>
-        <div class="proj-tags">
-          <span class="proj-tag">Java</span>
-          <span class="proj-tag">Spring Boot</span>
-          <span class="proj-tag">Redis</span>
-          <span class="proj-tag">Bucket4j</span>
-          <span class="proj-tag">PostgreSQL</span>
-          <span class="proj-tag">Resilience4j</span>
-          <span class="proj-tag">Spring AI MCP</span>
-          <span class="proj-tag">Docker</span>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <h3><span class="proj-icon">🤖</span> Rate Limiter Agents</h3>
-        <ul class="proj-points">
-          <li>AI-powered anomaly detection with a multi-agent pipeline</li>
-          <li>Monitors rate limiter telemetry in real time</li>
-          <li>Specialist agents analyze errors, token health, and traffic patterns</li>
-          <li>Orchestrator synthesizes findings into a severity verdict and action</li>
-        </ul>
-        <div class="proj-links">
-          <a href="/projects/rate-limiter-agents" class="proj-link">
-            <svg height="13" width="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-            View Details
-          </a>
-          <a href="https://github.com/Alluraviteja/rate-limit-agent" target="_blank" rel="noopener noreferrer" class="proj-link">
-            <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-            GitHub
-          </a>
-        </div>
-        <div class="proj-tags">
-          <span class="proj-tag">Generative AI</span>
-          <span class="proj-tag">AI Agents</span>
-          <span class="proj-tag">Anomaly Detection</span>
-          <span class="proj-tag">Python</span>
-          <span class="proj-tag">FastAPI</span>
-          <span class="proj-tag">PostgreSQL</span>
-          <span class="proj-tag">Docker</span>
-        </div>
-      </div>
-
-      <div class="project-card">
         <h3><span class="proj-icon">♟️</span> Chess</h3>
         <ul class="proj-points">
           <li>Real-time multiplayer chess game</li>
           <li>Move validation</li>
-          <li>Game history</li>
           <li>Live opponent matching</li>
         </ul>
         <div class="proj-links">
@@ -288,35 +291,30 @@
     <h2 class="section-title">Skills &amp; Technologies</h2>
     <div class="skills-grid">
       <span class="skill-tag">Java</span>
-      <span class="skill-tag">JavaScript</span>
-      <span class="skill-tag">Python</span>
       <span class="skill-tag">Spring Boot</span>
-      <span class="skill-tag">JHipster</span>
-      <span class="skill-tag">Spring Security</span>
+      <span class="skill-tag">Spring AI MCP</span>
       <span class="skill-tag">Spring Data JPA</span>
-      <span class="skill-tag">Hibernate</span>
+      <span class="skill-tag">Spring Security</span>
+      <span class="skill-tag">LLM Agents</span>
+      <span class="skill-tag">Multi-agent Systems</span>
+      <span class="skill-tag">Prompt Engineering</span>
+      <span class="skill-tag">Python</span>
       <span class="skill-tag">Apache Kafka</span>
       <span class="skill-tag">Elasticsearch</span>
+      <span class="skill-tag">Hibernate</span>
       <span class="skill-tag">Docker</span>
       <span class="skill-tag">Keycloak</span>
-      <span class="skill-tag">Liquibase</span>
       <span class="skill-tag">Maven</span>
-      <span class="skill-tag">JUnit</span>
-      <span class="skill-tag">Mockito</span>
-      <span class="skill-tag">SonarCloud</span>
       <span class="skill-tag">Grafana</span>
       <span class="skill-tag">OpenTelemetry</span>
       <span class="skill-tag">PostgreSQL</span>
       <span class="skill-tag">MySQL</span>
-      <span class="skill-tag">MongoDB</span>
       <span class="skill-tag">AWS</span>
-      <span class="skill-tag">Stripe API</span>
       <span class="skill-tag">GitHub</span>
-      <span class="skill-tag">Jira</span>
-      <span class="skill-tag">Agile</span>
-      <span class="skill-tag">Factory Method</span>
-      <span class="skill-tag">Singleton</span>
-      <span class="skill-tag">REST APIs</span>
+      <span class="skill-tag">Redis</span>
+      <span class="skill-tag">Bucket4j</span>
+      <span class="skill-tag">Resilience4j</span>
+      <span class="skill-tag">GitHub Actions</span>
     </div>
   </section>
 
@@ -372,7 +370,7 @@
     <p>Designed &amp; Built by {{.Name}} &nbsp;&middot;&nbsp; <span id="year"></span> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy Policy</a></p>
   </footer>
 
-  <script src="/static/js/main.js" defer></script>
+  <script src="/static/js/main.js?v={{.Version}}" defer></script>
 
 </body>
 </html>

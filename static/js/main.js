@@ -35,6 +35,28 @@ if (sections.length && navLinks.length) {
   sections.forEach(section => observer.observe(section));
 }
 
+// URL hash update on scroll
+const allSections = Array.from(document.querySelectorAll('section[id]'));
+if (allSections.length) {
+  let hashUpdateReady = false;
+  setTimeout(() => { hashUpdateReady = true; }, 500);
+
+  function updateHash() {
+    if (!hashUpdateReady) return;
+    const mid = window.scrollY + window.innerHeight / 2;
+    let current = allSections[0];
+    for (const section of allSections) {
+      if (section.offsetTop <= mid) current = section;
+    }
+    const next = '#' + current.id;
+    if (window.location.hash !== next) {
+      history.replaceState(null, '', next);
+    }
+  }
+
+  window.addEventListener('scroll', updateHash, { passive: true });
+}
+
 // Hamburger menu
 const hamburger = document.getElementById('hamburger');
 const navMenu = document.getElementById('nav-menu');
