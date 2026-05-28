@@ -27,6 +27,7 @@
   line-height: 1.75; margin-bottom: var(--sp-3);
 }
 .page-hero .proj-tags { justify-content: center; }
+.page-hero .hero-btns { justify-content: center; }
 
 /* ── CONTENT SECTION ── */
 .content-section {
