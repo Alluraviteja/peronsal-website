@@ -12,11 +12,11 @@ import (
 )
 
 type PageData struct {
-	Name        string
-	Title       string
-	Tagline     string
-	Version     string
-	LastUpdated string
+	Name               string
+	Title              string
+	Tagline            string
+	Version            string
+	PrivacyLastUpdated string
 }
 
 var tmpl *template.Template
@@ -33,11 +33,11 @@ func init() {
 }
 
 var defaultData = PageData{
-	Name:        "Raviteja",
-	Title:       "Software Engineer",
-	Tagline:     "Building reliable systems and clean interfaces.",
-	Version:     fmt.Sprintf("%d", time.Now().UnixMilli()),
-	LastUpdated: time.Now().Format("January 2, 2006"),
+	Name:               "Raviteja",
+	Title:              "Software Engineer",
+	Tagline:            "Building reliable systems and clean interfaces.",
+	Version:            fmt.Sprintf("%d", time.Now().UnixMilli()),
+	PrivacyLastUpdated: "May 27, 2026",
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
