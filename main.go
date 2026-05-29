@@ -72,6 +72,20 @@ func privacyHandler(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
+func wwwRedirect(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		host := r.Host
+		if len(host) > 4 && host[:4] == "www." {
+			url := *r.URL
+			url.Host = host[4:]
+			url.Scheme = "https"
+			http.Redirect(w, r, url.String(), http.StatusMovedPermanently)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -92,7 +106,7 @@ func main() {
 	mux.HandleFunc("/", indexHandler)
 
 	log.Printf("listening on http://localhost:%s", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	if err := http.ListenAndServe(":"+port, wwwRedirect(mux)); err != nil {
 		log.Fatal(err)
 	}
 }
